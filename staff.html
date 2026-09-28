@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พื้นที่ทำงานเจ้าหน้าที่ · e-Mailbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="brand-stripe" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <aside class="app-sidebar">
+      <div class="brand">
+        <div class="seal">
+          <div class="t">E-MAILBOX</div>
+        </div>
+        <div>
+          <div class="brand-name">e-Mailbox</div>
+          <div class="brand-sub">สาขาวิชา</div>
+        </div>
+      </div>
+
+      <nav>
+        <button class="app-nav-item active" data-view="inbox" onclick="goView('inbox')">
+          <span>📥</span> กล่องเอกสาร
+        </button>
+        <button class="app-nav-item" data-view="register" onclick="goView('register')">
+          <span>➕</span> ลงทะเบียนเอกสารใหม่
+        </button>
+      </nav>
+
+      <div class="app-sidebar-foot">
+        <div class="app-role-chip">
+          <span>👤</span>
+          <div><b>เจ้าหน้าที่รับเอกสาร</b>พนักงานรับส่งเอกสาร</div>
+        </div>
+        <a class="app-back-link" href="index.html">← กลับหน้าข้อมูลทั่วไป</a>
+      </div>
+    </aside>
+
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="appTitle">กล่องเอกสาร</h1>
+          <div class="sub" id="appSub">เอกสารทั้งหมดที่ลงทะเบียนในระบบ</div>
+        </div>
+        <button class="btn btn-primary" onclick="goView('register')">+ ลงทะเบียนเอกสาร</button>
+      </div>
+
+      <!-- ===== View: Inbox (browse + search) ===== -->
+      <div id="view-inbox">
+        <div class="doc-search-bar">
+          <input type="search" id="docSearch" placeholder="ค้นหาด้วยเลขที่อ้างอิง เรื่อง ผู้ส่ง หรือประเภท">
+          <select id="docTypeFilter">
+            <option value="">ทุกประเภท</option>
+            <option>หนังสือราชการ</option>
+            <option>บันทึกข้อความ</option>
+            <option>เอกสารจากคณะ</option>
+            <option>เอกสารภายใน</option>
+          </select>
+        </div>
+        <div class="doc-table-wrap" id="docTableWrap">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>เลขที่อ้างอิง</th>
+                <th>เรื่อง</th>
+                <th>ผู้ส่ง</th>
+                <th>วันที่</th>
+                <th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="docTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="docEmpty">ยังไม่มีเอกสารในระบบ — เริ่มลงทะเบียนเอกสารแรกได้ที่ปุ่มด้านบน</div>
+      </div>
+
+      <!-- ===== View: Register ===== -->
+      <div id="view-register" style="display:none;">
+        <div class="form-card">
+          <form id="registerForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="fSender">ผู้ส่ง</label>
+                <input type="text" id="fSender" placeholder="ชื่อบุคคลหรือหน่วยงานต้นทาง" required>
+              </div>
+              <div class="field">
+                <label for="fDate">วันที่</label>
+                <input type="date" id="fDate">
+              </div>
+              <div class="field full">
+                <label for="fSubject">เรื่อง</label>
+                <input type="text" id="fSubject" placeholder="หัวเรื่องของเอกสารโดยย่อ" required>
+              </div>
+              <div class="field">
+                <label for="fType">ประเภทเอกสาร</label>
+                <select id="fType" required>
+                  <option value="">เลือกประเภท</option>
+                  <option>หนังสือราชการ</option>
+                  <option>บันทึกข้อความ</option>
+                  <option>เอกสารจากคณะ</option>
+                  <option>เอกสารภายใน</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="fFile">ไฟล์เอกสารแนบ</label>
+                <input type="file" id="fFile" accept=".pdf,image/*">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn" style="margin-right:10px;" onclick="goView('inbox')">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary">บันทึกเข้าระบบ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== View: Detail (read-only) ===== -->
+      <div id="view-detail" style="display:none;">
+        <button class="btn" style="margin-bottom:18px;" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
+        <div class="detail-card">
+          <div class="mono detail-ref" id="detailRef"></div>
+          <h2 class="detail-subject" id="detailSubject"></h2>
+          <div class="detail-meta" id="detailMeta"></div>
+          <span class="status-pill" id="detailStatus"></span>
+
+          <div style="margin-top:22px;">
+            <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
+            <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
+            <div class="field-row"><span class="fname">วันที่</span><span class="fnote mono" id="detailDate"></span></div>
+            <div class="field-row"><span class="fname">ไฟล์แนบ</span><span class="fnote" id="detailFile"></span></div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()">⬇ ดาวน์โหลดเอกสาร</button>
+            <button class="btn btn-danger" id="btnCancel" onclick="cancelDoc()">ยกเลิกเอกสาร</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

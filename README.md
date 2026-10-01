@@ -180,3 +180,15 @@ V1 ครอบคลุมการให้ข้อมูลพื้นฐ�
 **Out of Scope**
 
 V1 ยังไม่ครอบคลุมการจัดการเอกสารจริง เช่น การรับและลงทะเบียนเอกสาร การกระจายเอกสาร การติดตามสถานะ การจัดการสิทธิ์ Workflow หลายขั้นตอน Deadline, Inbox และ Audit Trail
+
+graph TD
+    User((👨‍‍💻 User / Teacher))
+    subgraph AWS Cloud Environment
+        EC2[🖥️ Amazon EC2<br/>- Ubuntu t3.micro<br/>- Spring Boot App]
+        RDS[(🗄️ Amazon RDS<br/>- MySQL Database)]
+        S3[[📦 Amazon S3<br/>- Document Storage]]
+    end
+
+    User -- HTTP (Port 8080) --> EC2
+    EC2 -- JDBC (Port 3306) --> RDS
+    EC2 -- Multipart Upload --> S3

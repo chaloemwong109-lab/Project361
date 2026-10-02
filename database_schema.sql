@@ -42,6 +42,8 @@ CREATE TABLE documents (
     type_id INT,
     created_by INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (type_id) REFERENCES document_types(type_id),
     FOREIGN KEY (created_by) REFERENCES users(user_id)
 );

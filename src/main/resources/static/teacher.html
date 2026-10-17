@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พื้นที่ทำงานอาจารย์ · e-Mailbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* สไตล์เพิ่มเติมสำหรับปุ่มสถานะ */
+    .btn-status-progress { background-color: #17a2b8; color: white; border: none; }
+    .btn-status-done { background-color: #28a745; color: white; border: none; }
+    .btn-status-progress:hover { opacity: 0.9; }
+    .btn-status-done:hover { opacity: 0.9; }
+  </style>
+</head>
+
+<body data-role="teacher" data-read-only="true">
+
+  <div class="brand-stripe" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <aside class="app-sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="images/thammasat-logo.png" alt="ตราสัญลักษณ์มหาวิทยาลัยธรรมศาสตร์">
+        <div>
+          <div class="brand-name">e-Mailbox</div>
+          <div class="brand-sub">สาขาวิชาวิทยาการคอมพิวเตอร์</div>
+        </div>
+      </div>
+
+      <nav>
+        <button class="app-nav-item active" id="nav-all" onclick="switchTeacherTab('ALL')">
+          <span>📥</span> กล่องเอกสาร
+        </button>
+        <button class="app-nav-item" id="nav-assigned" onclick="switchTeacherTab('ASSIGNED')">
+          <span>📌</span> งานที่ได้รับมอบหมาย
+        </button>
+      </nav>
+
+      <div class="app-sidebar-foot">
+        <div class="app-role-chip">
+          <span>👤</span>
+          <div><b id="teacherNameDisplay">กำลังโหลด...</b>ผู้ดูแลเอกสารภาควิชา</div>
+        </div>
+        <!-- 1. เพิ่มปุ่มออกจากระบบ -->
+        <button onclick="logout()" class="btn" style="width: 100%; margin-bottom: 8px; background: #fff; color: #800000; font-weight: bold; cursor: pointer;">ออกจากระบบ</button>
+        <a class="app-back-link" href="index.html">← กลับหน้าข้อมูลทั่วไป</a>
+      </div>
+    </aside>
+
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="appTitle">กล่องเอกสาร</h1>
+          <div class="sub" id="appSub">เอกสารทั่วไปและเอกสารที่ได้รับมอบหมาย</div>
+        </div>
+      </div>
+
+      <div id="view-inbox">
+        <div class="doc-search-bar">
+          <input type="search" id="docSearch" placeholder="ค้นหาด้วยเลขที่อ้างอิง เรื่อง หรือผู้ส่ง" oninput="applyFilter()">
+          <select id="docTypeFilter" onchange="applyFilter()">
+            <option value="">ทุกประเภท</option>
+          </select>
+          <button class="btn btn-primary" onclick="applyFilter()">ค้นหา</button>
+        </div>
+
+        <div class="doc-filter-row">
+          <button class="doc-filter active" onclick="filterByStatus('')">ทั้งหมด</button>
+          <button class="doc-filter" onclick="filterByStatus('PENDING')">รอรับเรื่อง</button>
+          <button class="doc-filter" onclick="filterByStatus('SUBMITTED')">รับเรื่องแล้ว</button>
+          <button class="doc-filter" onclick="filterByStatus('IN_PROGRESS')">กำลังดำเนินการ</button>
+          <button class="doc-filter" onclick="filterByStatus('DONE')">เสร็จสิ้น</button>
+          <button class="doc-filter" onclick="filterByStatus('FORWARDED')">ส่งต่อแล้ว</button>
+        </div>
+
+        <div class="doc-table-wrap" id="docTableWrap">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>เลขที่อ้างอิง</th>
+                <th>เรื่อง</th>
+                <th>ผู้ส่ง</th>
+                <th>วันที่</th>
+                <th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="docTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="docEmpty">ยังไม่มีเอกสารในระบบสำหรับอาจารย์</div>
+      </div>
+
+      <!-- ===== View: Detail ===== -->
+      <div id="view-detail" style="display:none;">
+        <button class="btn" style="margin-bottom:18px;" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
+        <div class="detail-card">
+          <div class="mono detail-ref" id="detailRef"></div>
+          <h2 class="detail-subject" id="detailSubject"></h2>
+          <div class="detail-meta" id="detailMeta"></div>
+          <span class="status-pill" id="detailStatus"></span>
+
+          <div style="margin-top:22px;">
+            <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
+            <div class="field-row"><span class="fname">ประเภทการเข้าถึง</span><span class="fnote" id="detailScope"></span></div>
+            <div class="field-row"><span class="fname">วันที่</span><span class="fnote mono" id="detailDate"></span></div>
+            <div class="field-row"><span class="fname">ไฟล์แนบ</span><span class="fnote" id="detailFile"></span></div>
+          </div>
+
+          <!-- ชุดเครื่องมือจัดการเอกสาร (สำหรับผู้รับผิดชอบ) -->
+          <div class="detail-actions" id="actionSection" style="margin-top: 25px; display: none; background: #fdf5e6; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight:bold; display:inline-block; width:150px;">เปลี่ยนสถานะเอกสาร:</label>
+                <select id="statusDropdown" class="form-control" style="padding: 8px; border-radius: 4px;" onchange="updateStatus(this.value)">
+                    <option value="PENDING" disabled hidden>รอรับเรื่อง</option>
+                    <option value="SUBMITTED">รับเรื่องแล้ว</option>
+                    <option value="IN_PROGRESS">กำลังดำเนินการ</option>
+                    <option value="DONE">เสร็จสิ้น</option>
+                </select>
+            </div>
+
+            <hr style="border: 0.5px solid #ccc; margin: 15px 0;">
+
+            <div>
+                <label style="font-weight:bold; display:inline-block; width:150px;">มอบหมาย / ส่งต่อ:</label>
+                <select id="forwardDropdown" class="form-control" style="padding: 8px; border-radius: 4px; min-width: 200px;">
+                    <option value="">-- เลือกอาจารย์/เจ้าหน้าที่ --</option>
+                </select>
+                <button class="btn btn-primary" onclick="forwardDocument()" style="margin-left: 10px; background-color: #172b4d;">ส่งต่อเอกสาร</button>
+            </div>
+          </div>
+          
+          <div style="margin-top: 15px;">
+              <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()">ดาวน์โหลดไฟล์แนบ</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let allDocuments = [];
+    let selectedDoc = null;
+    let currentStatusFilter = ''; // จำสถานะปุ่มที่กดกรอง
+    let docTypeMap = {};          // จำชื่อประเภทเอกสาร
+    let currentScopeTab = 'ALL'; // 'ALL' = กล่องเอกสารทั้งหมด, 'ASSIGNED' = งานที่ได้รับมอบหมาย
+    // 1. ตรวจสอบสิทธิ์และเริ่มต้นระบบของอาจารย์
+    async function initTeacherPage() {
+      try {
+        const res = await fetch('/api/current-user');
+        if (!res.ok) {
+          window.location.href = 'login.html';
+          return;
+        }
+        currentUser = await res.json();
+        
+        if (currentUser.role === 'STAFF') {
+          window.location.href = 'staff.html';
+          return;
+        }
+
+        const nameEl = document.getElementById('teacherNameDisplay');
+        if (nameEl) nameEl.textContent = currentUser.fullName;
+
+        // โหลดข้อมูลทั้ง 3 ส่วนตามลำดับ
+        await loadDocumentTypesForTeacher();
+        await loadDocuments();
+        await loadLecturersForForwarding();
+      } catch (err) {
+        console.error('Init error:', err);
+      }
+    }
+
+    // 2. ดึงประเภทเอกสารมาใส่ Dropdown ตัวกรอง
+    async function loadDocumentTypesForTeacher() {
+      try {
+        let res = await fetch('/api/documents/types');
+        if (!res.ok) {
+          res = await fetch('/api/document-types');
+        }
+        if (res.ok) {
+          const types = await res.json();
+          const selectEl = document.getElementById('docTypeFilter');
+          if (selectEl) {
+            selectEl.innerHTML = '<option value="">ทุกประเภท</option>';
+          }
+
+          types.forEach(t => {
+            const id = t.typeId || t.id;
+            const name = t.typeName || t.name;
+            docTypeMap[id] = name;
+            if (selectEl) {
+              const opt = document.createElement('option');
+              opt.value = id;
+              opt.textContent = name;
+              selectEl.appendChild(opt);
+            }
+          });
+        }
+      } catch (err) {
+        console.error('โหลดประเภทเอกสารไม่สำเร็จ:', err);
+      }
+    }
+
+    // 3. ดึงรายการเอกสารจาก Backend
+    async function loadDocuments() {
+      try {
+        const res = await fetch('/api/documents');
+        if (res.ok) {
+          allDocuments = await res.json();
+          applyFilter(); // แสดงผลผ่านตัวกรอง
+        } else {
+          console.error('ไม่สามารถดึงเอกสารได้ Status:', res.status);
+        }
+      } catch (err) {
+        console.error('โหลดเอกสารไม่สำเร็จ:', err);
+      }
+    }
+
+    // 4. ดึงรายชื่ออาจารย์สำหรับส่งต่อเอกสาร (Forward)
+    async function loadLecturersForForwarding() {
+      try {
+        const res = await fetch('/api/lecturers');
+        if (res.ok) {
+          const lecturers = await res.json();
+          const selectEl = document.getElementById('forwardDropdown'); // 👈 แก้เป็น forwardDropdown ให้ตรงกับ HTML
+          if (selectEl) {
+            selectEl.innerHTML = '<option value="">-- เลือกอาจารย์/เจ้าหน้าที่ --</option>';
+            lecturers.forEach(lec => {
+              if (currentUser && lec.id !== currentUser.id) {
+                const opt = document.createElement('option');
+                opt.value = lec.id;
+                opt.textContent = `${lec.fullName} (${lec.username})`;
+                selectEl.appendChild(opt);
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error('โหลดรายชื่ออาจารย์ไม่สำเร็จ:', err);
+      }
+    }
+
+    // 5. แสดงผลตารางเอกสาร
+    function renderTable(docs) {
+      const tbody = document.getElementById('docTableBody');
+      const emptyDiv = document.getElementById('docEmpty');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!docs || docs.length === 0) {
+        if (emptyDiv) emptyDiv.style.display = 'block';
+        return;
+      }
+      if (emptyDiv) emptyDiv.style.display = 'none';
+
+      // เรียงเอาเอกสารใหม่ล่าสุดขึ้นก่อน
+      docs.slice().reverse().forEach(doc => {
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => showDetail(doc);
+
+        const isAssignee = (currentUser && doc.assignedTo === currentUser.id);
+        const isForwarder = (currentUser && doc.forwardedBy === currentUser.id && !isAssignee);
+
+        let tagScope = '<span style="color:#007bff; margin-left:8px;">[เอกสารทั่วไป]</span>';
+        if (isAssignee) {
+          tagScope = '<span style="color:#e83e8c; font-weight:bold; margin-left:8px;">[มอบหมายถึงคุณ]</span>';
+        } else if (isForwarder) {
+          tagScope = '<span style="color:#6c757d; font-weight:bold; margin-left:8px;">[คุณส่งต่อแล้ว]</span>';
+        }
+
+        const displayStatus = isForwarder ? 'ส่งต่อแล้ว' : (doc.currentStatus || 'รอรับเรื่อง');
+        const statusClass = isForwarder ? 'forwarded' : (doc.status || 'PENDING').toLowerCase();
+        const typeName = docTypeMap[doc.typeId] || 'ไม่ระบุประเภท';
+
+        tr.innerHTML = `
+          <td class="mono">${doc.referenceNumber || '-'}</td>
+          <td>
+            <b>${doc.subject || '-'}</b> ${tagScope}
+            <span class="cell-sub" style="display:block; font-size:11.5px; color:#9E8C82; margin-top:2px;">${typeName}</span>
+          </td>
+          <td>${doc.senderName || '-'}</td>
+          <td class="mono">${doc.documentDate || '-'}</td>
+          <td><span class="status-pill status-${statusClass}">${displayStatus}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 6. กดปุ่มกรองตามสถานะ
+    function filterByStatus(status) {
+      document.querySelectorAll('.doc-filter').forEach(btn => btn.classList.remove('active'));
+      if (window.event && window.event.target) {
+        window.event.target.classList.add('active');
+      }
+      currentStatusFilter = status;
+      applyFilter();
+    }
+
+    // 7. ฟังก์ชันกรองรวม (แท็บด้านซ้าย + ค้นหา + ประเภทเอกสาร + สถานะ)
+    function applyFilter() {
+      const q = (document.getElementById('docSearch')?.value || '').toLowerCase().trim();
+      const selectedTypeId = document.getElementById('docTypeFilter')?.value || '';
+
+      const filtered = allDocuments.filter(d => {
+        const isAssignee = (currentUser && d.assignedTo === currentUser.id);
+        const isForwarder = (currentUser && d.forwardedBy === currentUser.id && !isAssignee);
+        const effectiveStatus = isForwarder ? 'FORWARDED' : (d.status || 'PENDING');
+        const typeName = (docTypeMap[d.typeId] || '').toLowerCase();
+
+        // 🌟 1. กรองตามแท็บเมนูด้านซ้าย (ถ้าเลือก "งานที่ได้รับมอบหมาย" ให้แสดงเฉพาะงานที่เรารับผิดชอบ หรือเคยรับผิดชอบแล้วส่งต่อ)
+        const matchScope = (currentScopeTab === 'ALL') || isAssignee || isForwarder;
+        // (หมายเหตุ: ถ้าไม่อยากให้โชว์งานที่ตัวเองส่งต่อให้คนอื่นไปแล้วในแท็บนี้ ให้แก้บรรทัดบนเป็น: const matchScope = (currentScopeTab === 'ALL') || isAssignee; ได้เลยครับ)
+
+        // 2. กรองสถานะ
+        let matchStatus = true;
+        if (currentStatusFilter) {
+          if (currentStatusFilter === 'PENDING') {
+            matchStatus = (effectiveStatus === 'PENDING' || (!isForwarder && d.currentStatus === 'รอรับเรื่อง'));
+          } else if (currentStatusFilter === 'SUBMITTED') {
+            matchStatus = (effectiveStatus === 'SUBMITTED' && d.currentStatus === 'รับเรื่องแล้ว');
+          } else {
+            matchStatus = (effectiveStatus === currentStatusFilter);
+          }
+        }
+
+        // 3. กรองประเภทเอกสาร
+        const matchType = !selectedTypeId || String(d.typeId) === String(selectedTypeId);
+
+        // 4. กรองคำค้นหา
+        const matchQuery = !q || 
+          (d.subject && d.subject.toLowerCase().includes(q)) ||
+          (d.senderName && d.senderName.toLowerCase().includes(q)) ||
+          (d.referenceNumber && d.referenceNumber.toLowerCase().includes(q)) ||
+          typeName.includes(q);
+
+        return matchScope && matchStatus && matchType && matchQuery;
+      });
+
+      renderTable(filtered);
+    }
+
+    // ฟังก์ชันเสริมเผื่อปุ่มค้นหาเดิมเรียกชื่อ searchDocs()
+    function searchDocs() {
+      applyFilter();
+    }
+
+    // 8. แสดงหน้ารายละเอียดเอกสาร
+    function showDetail(doc) {
+      selectedDoc = doc;
+      const isAssignee = (currentUser && doc.assignedTo === currentUser.id);
+      const isForwarder = (currentUser && doc.forwardedBy === currentUser.id && !isAssignee);
+
+      document.getElementById('detailRef').textContent = doc.referenceNumber || 'ไม่มีเลขที่อ้างอิง';
+      document.getElementById('detailSubject').textContent = doc.subject || '-';
+      document.getElementById('detailSender').textContent = doc.senderName || '-';
+      document.getElementById('detailDate').textContent = doc.documentDate || '-';
+      
+      const detailTypeEl = document.getElementById('detailType');
+      if (detailTypeEl) {
+        detailTypeEl.textContent = docTypeMap[doc.typeId] || 'ไม่ระบุประเภท';
+      }
+
+      document.getElementById('detailStatus').textContent = isForwarder ? 'ส่งต่อแล้ว' : (doc.currentStatus || 'รอรับเรื่อง');
+      
+      const scopeEl = document.getElementById('detailScope');
+      if (scopeEl) {
+        if (isAssignee) {
+          scopeEl.innerHTML = '<b style="color: #e83e8c;">งานที่คุณเป็นผู้รับผิดชอบโดยตรง</b>';
+        } else if (isForwarder) {
+          scopeEl.innerHTML = '<b style="color: #6c757d;">งานที่คุณได้ส่งต่อให้ผู้อื่นแล้ว</b>';
+        } else {
+          scopeEl.innerHTML = '<span style="color: #007bff;">เอกสารประกาศทั่วไป</span>';
+        }
+      }
+
+      // 🌟 เช็กว่ามีไฟล์แนบหรือไม่ และสั่งซ่อน/แสดงปุ่มดาวน์โหลด
+      const hasFile = Boolean(doc.attachmentFile && doc.attachmentFile.trim() !== '' && doc.attachmentFile !== '-');
+      document.getElementById('detailFile').textContent = hasFile ? 'มีไฟล์แนบพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
+
+      const btnDownload = document.getElementById('btnDownload');
+      if (btnDownload) {
+        btnDownload.style.display = hasFile ? 'inline-block' : 'none';
+      }
+
+      const actionSection = document.getElementById('actionSection');
+      const statusDropdown = document.getElementById('statusDropdown');
+
+      if (actionSection && statusDropdown) {
+        if (isAssignee) {
+          actionSection.style.display = 'block';
+          statusDropdown.value = doc.status || 'PENDING';
+        } else {
+          actionSection.style.display = 'none';
+        }
+      }
+
+      goView('detail');
+    }
+
+    // 9. อัปเดตสถานะเอกสาร
+    async function updateStatus(newStatus) {
+      if (!selectedDoc) return;
+      try {
+        const docId = selectedDoc.documentId || selectedDoc.id;
+        const res = await fetch(`/api/documents/${docId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          document.getElementById('detailStatus').textContent = updated.currentStatus;
+          await loadDocuments();
+          alert('✅ อัปเดตสถานะเป็น "' + updated.currentStatus + '" เรียบร้อยแล้ว');
+        } else {
+          alert('❌ ไม่สามารถเปลี่ยนสถานะได้: ' + await res.text());
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      }
+    }
+
+    // 10. ส่งต่อเอกสารให้อาจารย์ท่านอื่น
+    async function forwardDocument() { // 👈 เปลี่ยนชื่อให้ตรงกับ onclick="forwardDocument()"
+      if (!selectedDoc) return;
+      const newAssignee = document.getElementById('forwardDropdown')?.value; // 👈 แก้เป็น forwardDropdown
+      if (!newAssignee) {
+        alert('กรุณาเลือกอาจารย์ที่ต้องการส่งต่อเอกสารให้');
+        return;
+      }
+      if (!confirm('คุณต้องการส่งต่อเอกสารนี้ใช่หรือไม่?')) return;
+
+      try {
+        const docId = selectedDoc.documentId || selectedDoc.id;
+        const res = await fetch(`/api/documents/${docId}/forward`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newAssignee: Number(newAssignee) })
+        });
+        if (res.ok) {
+          alert('✅ ส่งต่อเอกสารเรียบร้อยแล้ว!');
+          goView('inbox');
+          await loadDocuments();
+        } else {
+          alert('❌ ส่งต่อไม่สำเร็จ: ' + await res.text());
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      }
+    }
+
+    // 11. ดาวน์โหลดไฟล์แนบจริง
+    function downloadFile() {
+      if (!selectedDoc || !selectedDoc.attachmentFile || selectedDoc.attachmentFile === '-') return;
+
+      const fileVal = selectedDoc.attachmentFile.trim();
+      if (fileVal.startsWith('http://') || fileVal.startsWith('https://') || fileVal.startsWith('/')) {
+        const link = document.createElement('a');
+        link.href = fileVal;
+        link.target = '_blank';
+        link.setAttribute('download', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const docId = selectedDoc.documentId || selectedDoc.id;
+        window.location.href = `/api/documents/${docId}/download`;
+      }
+    }
+
+    // 12. สลับหน้าจอ Inbox <-> Detail
+    function goView(view) {
+      document.getElementById('view-inbox').style.display = (view === 'inbox') ? 'block' : 'none';
+      document.getElementById('view-detail').style.display = (view === 'detail') ? 'block' : 'none';
+    }
+
+    // 13. ออกจากระบบ
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', initTeacherPage);
+
+    // ฟังก์ชันสลับแท็บเมนูด้านซ้าย
+    function switchTeacherTab(scope) {
+      currentScopeTab = scope;
+
+      // สลับสีปุ่มเมนูด้านซ้าย (Active)
+      document.getElementById('nav-all')?.classList.toggle('active', scope === 'ALL');
+      document.getElementById('nav-assigned')?.classList.toggle('active', scope === 'ASSIGNED');
+
+      // เปลี่ยนข้อความหัวข้อด้านบนให้ตรงกับแท็บ
+      const titleEl = document.querySelector('.app-topbar h1');
+      const subEl = document.querySelector('.app-topbar .sub');
+      if (scope === 'ASSIGNED') {
+        if (titleEl) titleEl.textContent = 'งานที่ได้รับมอบหมาย';
+        if (subEl) subEl.textContent = 'รายการเอกสารที่ระบุให้คุณเป็นผู้รับผิดชอบโดยตรง';
+      } else {
+        if (titleEl) titleEl.textContent = 'กล่องเอกสาร';
+        if (subEl) subEl.textContent = 'เอกสารทั่วไปและเอกสารที่ได้รับมอบหมาย';
+      }
+
+      // ถ้าเปิดหน้ารายละเอียดค้างไว้ ให้สลับกลับมาหน้าตารางก่อน
+      goView('inbox');
+      applyFilter();
+    }
+
+  </script>
+</body>
+
+</html>

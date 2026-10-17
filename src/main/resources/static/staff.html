@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พื้นที่ทำงานเจ้าหน้าที่ · e-Mailbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-role="staff" data-read-only="false">
+
+  <div class="brand-stripe" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <aside class="app-sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="images/thammasat-logo.png" alt="ตราสัญลักษณ์มหาวิทยาลัยธรรมศาสตร์">
+        <div>
+          <div class="brand-name">e-Mailbox</div>
+          <div class="brand-sub">สาขาวิชาวิทยาการคอมพิวเตอร์</div>
+        </div>
+      </div>
+
+      <nav>
+        <button class="app-nav-item active" data-view="inbox" onclick="goView('inbox')">
+          <span>📥</span> กล่องเอกสาร
+        </button>
+        <button class="app-nav-item" data-view="register" onclick="goView('register')">
+          <span>➕</span> ลงทะเบียนเอกสารใหม่
+        </button>
+      </nav>
+
+      <div class="app-sidebar-foot">
+        <div class="app-role-chip" id="userRoleChip">
+          <span>👤</span>
+          <div><b>เจ้าหน้าที่รับเอกสาร</b><span id="userNameDisplay">กำลังโหลด...</span></div>
+        </div>
+        <button onclick="logout()" class="btn" style="width: 100%; margin-bottom: 8px; background: #fff; color: #800000; font-weight: bold; cursor: pointer;">ออกจากระบบ</button>
+        <a class="app-back-link" href="index.html">← กลับหน้าข้อมูลทั่วไป</a>
+      </div>
+    </aside>
+
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 id="appTitle">กล่องเอกสาร</h1>
+          <div class="sub" id="appSub">เอกสารทั้งหมดที่ลงทะเบียนในระบบ</div>
+        </div>
+        <button class="btn btn-primary" onclick="goView('register')">+ ลงทะเบียนเอกสาร</button>
+      </div>
+
+      <!-- ===== View: Inbox (browse + search) ===== -->
+      <div id="view-inbox">
+        <div class="doc-search-bar">
+          <input type="search" id="docSearch" placeholder="ค้นหาด้วยเลขที่อ้างอิง เรื่อง ผู้ส่ง หรือประเภท">
+          <select id="docTypeFilter">
+            <option value="">ทุกประเภท</option>
+          </select>
+        </div>
+
+        <!-- 🌟 เพิ่มแถวปุ่มกรองสถานะสำหรับ Staff -->
+        <div class="doc-filter-row">
+          <button class="doc-filter active" onclick="filterStaffByStatus('', event)">ทั้งหมด</button>
+          <button class="doc-filter" onclick="filterStaffByStatus('รอรับเรื่อง', event)">รอรับเรื่อง</button>
+          <button class="doc-filter" onclick="filterStaffByStatus('รับเรื่องแล้ว', event)">รับเรื่องแล้ว</button>
+          <button class="doc-filter" onclick="filterStaffByStatus('กำลังดำเนินการ', event)">กำลังดำเนินการ</button>
+          <button class="doc-filter" onclick="filterStaffByStatus('เสร็จสิ้น', event)">เสร็จสิ้น</button>
+          <button class="doc-filter" onclick="filterStaffByStatus('ยกเลิกแล้ว', event)">ยกเลิกแล้ว</button>
+        </div>
+
+        <div class="doc-table-wrap" id="docTableWrap">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>เลขที่อ้างอิง</th>
+                <th>เรื่อง</th>
+                <th>ผู้ส่ง</th>
+                <th>วันที่</th>
+                <th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="docTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="docEmpty">ยังไม่มีเอกสารในระบบ — เริ่มลงทะเบียนเอกสารแรกได้ที่ปุ่มด้านบน</div>
+      </div>
+
+      <!-- ===== View: Register ===== -->
+      <div id="view-register" style="display:none;">
+        <div class="form-card">
+          <form id="registerForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="fSender">ผู้ส่ง</label>
+                <input type="text" id="fSender" placeholder="ชื่อบุคคลหรือหน่วยงานต้นทาง" required>
+              </div>
+              <div class="field">
+                <label for="fDate">วันที่</label>
+                <input type="date" id="fDate">
+              </div>
+              <div class="field full">
+                <label for="fSubject">เรื่อง</label>
+                <input type="text" id="fSubject" placeholder="หัวเรื่องของเอกสารโดยย่อ" required>
+              </div>
+              <div class="field">
+                <label for="fType">ประเภทเอกสาร</label>
+                <select id="fType" required>
+                  <option value="">เลือกประเภท</option>
+                </select>
+              </div>
+              
+              <!-- ช่องเลือกผู้รับผิดชอบที่เพิ่มเข้ามา -->
+              <div class="field">
+                <label for="assignedTo">ผู้รับผิดชอบดำเนินการ</label>
+                <select id="assignedTo" name="assignedTo">
+                  <option value="">— ไม่ระบุ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="fFile">ไฟล์เอกสารแนบ</label>
+                <input type="file" id="fFile" accept=".pdf,image/*">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn" style="margin-right:10px;" onclick="goView('inbox')">ยกเลิก</button>
+              <button type="submit" class="btn btn-primary">บันทึกเข้าระบบ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== View: Detail (read-only) ===== -->
+      <div id="view-detail" style="display:none;">
+        <button class="btn" style="margin-bottom:18px;" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
+        <div class="detail-card">
+          <div class="mono detail-ref" id="detailRef"></div>
+          <h2 class="detail-subject" id="detailSubject"></h2>
+          <div class="detail-meta" id="detailMeta"></div>
+          <span class="status-pill" id="detailStatus"></span>
+
+          <div style="margin-top:22px;">
+            <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
+            <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
+            <div class="field-row"><span class="fname">วันที่</span><span class="fnote mono" id="detailDate"></span></div>
+            <div class="field-row"><span class="fname">ไฟล์แนบ</span><span class="fnote" id="detailFile"></span></div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()">⬇ ดาวน์โหลดเอกสาร</button>
+            <button class="btn btn-danger" id="btnCancel" onclick="cancelDoc()">ยกเลิกเอกสาร</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+<script>
+    let allDocuments = [];
+    let selectedDoc = null;
+    let staffStatusFilter = '';
+    let docTypeMap = {};
+
+    // 1. ตรวจสอบสิทธิ์และโหลดข้อมูลเริ่มต้นทั้งหมด
+    async function checkStaffAuth() {
+        try {
+            const res = await fetch('/api/current-user');
+            if (!res.ok) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const user = await res.json();
+            if (user.role !== 'STAFF') {
+                window.location.href = 'teacher.html';
+                return;
+            }
+            document.getElementById('userNameDisplay').textContent = user.fullName;
+            
+            // โหลดประเภทเอกสาร -> รายชื่ออาจารย์ -> รายการเอกสารตามลำดับ
+            await loadDocumentTypes();
+            await loadLecturersDropdown();
+            await fetchDocumentsFromAPI();
+        } catch (err) {
+            console.error(err);
+            window.location.href = 'login.html';
+        }
+    }
+
+    // 2. โหลดประเภทเอกสารใส่ Dropdown ทั้งหน้าค้นหาและหน้าลงทะเบียน
+    async function loadDocumentTypes() {
+        try {
+            let res = await fetch('/api/documents/types');
+            if (!res.ok) res = await fetch('/api/document-types');
+
+            if (res.ok) {
+                const types = await res.json();
+                const fType = document.getElementById('fType');
+                const docTypeFilter = document.getElementById('docTypeFilter');
+
+                if (fType) fType.innerHTML = '<option value="">เลือกประเภท</option>';
+                if (docTypeFilter) docTypeFilter.innerHTML = '<option value="">ทุกประเภท</option>';
+
+                types.forEach(t => {
+                    const id = t.typeId || t.id;
+                    const name = t.typeName || t.name;
+                    docTypeMap[id] = name;
+
+                    if (fType) {
+                        const opt = document.createElement('option');
+                        opt.value = id;
+                        opt.textContent = name;
+                        fType.appendChild(opt);
+                    }
+                    if (docTypeFilter) {
+                        const optFilter = document.createElement('option');
+                        optFilter.value = id;
+                        optFilter.textContent = name;
+                        docTypeFilter.appendChild(optFilter);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error("โหลดประเภทเอกสารไม่สำเร็จ", err);
+        }
+    }
+
+    // 3. ดึงรายชื่ออาจารย์มาใส่ใน Dropdown ผู้รับผิดชอบ
+    async function loadLecturersDropdown() {
+        try {
+            const res = await fetch('/api/lecturers');
+            if (res.ok) {
+                const lecturers = await res.json();
+                const selectEl = document.getElementById('assignedTo');
+                if (selectEl) {
+                    selectEl.innerHTML = '<option value="">— ไม่ระบุ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>';
+                    lecturers.forEach(lec => {
+                        const opt = document.createElement('option');
+                        opt.value = lec.id;
+                        opt.textContent = `${lec.fullName} (${lec.username})`;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("โหลดรายชื่อผู้รับผิดชอบไม่สำเร็จ", err);
+        }
+    }
+
+    // 4. ดึงรายการเอกสารจาก Backend
+    async function fetchDocumentsFromAPI() {
+        try {
+            const response = await fetch('/api/documents');
+            if (!response.ok) return;
+            const data = await response.json();
+
+            allDocuments = data.map(dbDoc => {
+                let docTypeName = docTypeMap[dbDoc.typeId] || 'ไม่ระบุประเภท';
+                return {
+                    id: dbDoc.documentId || dbDoc.id,
+                    ref: dbDoc.referenceNumber || '-',
+                    subject: dbDoc.subject || '-',
+                    sender: dbDoc.senderName || '-',
+                    date: dbDoc.documentDate || '-',
+                    status: dbDoc.currentStatus || 'รอรับเรื่อง',
+                    rawStatus: dbDoc.status,
+                    isDeleted: dbDoc.isDeleted,
+                    typeId: dbDoc.typeId,
+                    type: docTypeName,
+                    fileName: dbDoc.attachmentFile || ''
+                };
+            });
+
+            applyFilter();
+        } catch (error) {
+            console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
+        }
+    }
+
+    // 5. กดปุ่มกรองตามสถานะ
+    function filterStaffByStatus(status, evt) {
+        document.querySelectorAll('.doc-filter').forEach(btn => btn.classList.remove('active'));
+        if (evt && evt.target) evt.target.classList.add('active');
+        staffStatusFilter = status;
+        applyFilter();
+    }
+
+    // 6. กรองข้อมูลรวม (ช่องค้นหา + ประเภทเอกสาร + ปุ่มสถานะ)
+    function applyFilter() {
+        const searchEl = document.getElementById('docSearch');
+        const typeEl = document.getElementById('docTypeFilter');
+        
+        const q = searchEl ? searchEl.value.toLowerCase().trim() : '';
+        const selectedType = typeEl ? typeEl.value : '';
+
+        const filtered = allDocuments.filter(doc => {
+            const matchQuery = !q ||
+                (doc.ref && doc.ref.toLowerCase().includes(q)) ||
+                (doc.subject && doc.subject.toLowerCase().includes(q)) ||
+                (doc.sender && doc.sender.toLowerCase().includes(q)) ||
+                (doc.type && doc.type.toLowerCase().includes(q));
+
+            const matchType = !selectedType || 
+                String(doc.typeId) === String(selectedType) || 
+                doc.type === selectedType;
+
+            let matchStatus = true;
+            if (staffStatusFilter) {
+                if (staffStatusFilter === 'ยกเลิกแล้ว') {
+                    matchStatus = (doc.status === 'ยกเลิกแล้ว' || doc.status === 'ยกเลิก' || doc.rawStatus === 'CANCELED' || doc.isDeleted === true);
+                } else {
+                    matchStatus = (doc.status === staffStatusFilter);
+                }
+            }
+
+            return matchQuery && matchType && matchStatus;
+        });
+
+        renderStaffTable(filtered);
+    }
+
+    // 7. วาดตารางแสดงผลเอกสาร
+    function renderStaffTable(list) {
+        const tbody = document.getElementById('docTableBody');
+        const emptyDiv = document.getElementById('docEmpty');
+        const tableWrap = document.getElementById('docTableWrap');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (!list || list.length === 0) {
+            if (emptyDiv) emptyDiv.style.display = 'block';
+            if (tableWrap) tableWrap.style.display = 'none';
+            return;
+        }
+
+        if (emptyDiv) emptyDiv.style.display = 'none';
+        if (tableWrap) tableWrap.style.display = 'block';
+
+        list.slice().reverse().forEach(doc => {
+            const tr = document.createElement('tr');
+            
+            const isCanceled = (
+                doc.rawStatus === 'CANCELED' || 
+                doc.status === 'ยกเลิกแล้ว' || 
+                doc.status === 'ยกเลิก' || 
+                doc.isDeleted === true
+            );
+
+            if (isCanceled) tr.classList.add('is-cancelled');
+
+            tr.innerHTML = `
+                <td class="mono">${doc.ref}</td>
+                <td>
+                    <span style="color:var(--ink);font-weight:600;">${doc.subject}</span>
+                    <span class="cell-sub">${doc.type}</span>
+                </td>
+                <td>${doc.sender}</td>
+                <td class="mono">${doc.date}</td>
+                <td><span class="status-pill${isCanceled ? ' cancelled' : ''}">${doc.status}</span></td>
+            `;
+            
+            tr.addEventListener('click', () => showStaffDetail(doc));
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 8. แสดงหน้ารายละเอียดเอกสารเมื่อคลิกที่แถว
+    function showStaffDetail(doc) {
+        selectedDoc = doc;
+        document.getElementById('detailRef').textContent = doc.ref;
+        document.getElementById('detailSubject').textContent = doc.subject;
+        document.getElementById('detailMeta').textContent = `${doc.type} · จาก ${doc.sender}`;
+        
+        const statusEl = document.getElementById('detailStatus');
+        statusEl.textContent = doc.status;
+        const isCanceled = (doc.rawStatus === 'CANCELED' || doc.status === 'ยกเลิกแล้ว' || doc.isDeleted === true);
+        statusEl.className = 'status-pill' + (isCanceled ? ' cancelled' : '');
+
+        document.getElementById('detailSender').textContent = doc.sender;
+        document.getElementById('detailType').textContent = doc.type;
+        document.getElementById('detailDate').textContent = doc.date;
+
+        // 🌟 เช็กว่ามีไฟล์แนบหรือไม่
+        const hasFile = Boolean(doc.fileName && doc.fileName.trim() !== '' && doc.fileName !== '-');
+        document.getElementById('detailFile').textContent = hasFile ? 'มีไฟล์แนบพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
+
+        // 🌟 ซ่อน/แสดง ปุ่มดาวน์โหลดตามจริง
+        const btnDownload = document.getElementById('btnDownload');
+        if (btnDownload) {
+            btnDownload.style.display = hasFile ? 'inline-block' : 'none';
+        }
+
+        // ซ่อนปุ่มยกเลิกถ้าเอกสารนี้ถูกยกเลิกไปแล้ว
+        const btnCancel = document.getElementById('btnCancel');
+        if (btnCancel) {
+            btnCancel.style.display = isCanceled ? 'none' : 'inline-block';
+        }
+
+        goView('detail');
+    }
+
+    // 9. สลับหน้าจอ (Inbox / Register / Detail)
+    function goView(view) {
+        document.getElementById('view-inbox').style.display = (view === 'inbox') ? 'block' : 'none';
+        document.getElementById('view-register').style.display = (view === 'register') ? 'block' : 'none';
+        document.getElementById('view-detail').style.display = (view === 'detail') ? 'block' : 'none';
+
+        document.querySelectorAll('.app-nav-item').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === view);
+        });
+
+        const titleEl = document.getElementById('appTitle');
+        const subEl = document.getElementById('appSub');
+        if (view === 'inbox') {
+            titleEl.textContent = 'กล่องเอกสาร';
+            subEl.textContent = 'เอกสารทั้งหมดที่ลงทะเบียนในระบบ';
+        } else if (view === 'register') {
+            titleEl.textContent = 'ลงทะเบียนเอกสารใหม่';
+            subEl.textContent = 'บันทึกข้อมูลเอกสารที่ได้รับเข้าสู่ระบบ ระบบจะออกเลขที่อ้างอิงให้อัตโนมัติ';
+        } else if (view === 'detail' && selectedDoc) {
+            titleEl.textContent = 'รายละเอียดเอกสาร';
+            subEl.textContent = selectedDoc.ref;
+        }
+    }
+
+    // 10. ดาวน์โหลดไฟล์แนบจริง
+    function downloadFile() {
+        if (!selectedDoc || !selectedDoc.fileName || selectedDoc.fileName === '-') return;
+        
+        const fileVal = selectedDoc.fileName.trim();
+        // กรณีเก็บเป็น Full URL (เช่น S3 URL) หรือ Path เต็ม
+        if (fileVal.startsWith('http://') || fileVal.startsWith('https://') || fileVal.startsWith('/')) {
+            const link = document.createElement('a');
+            link.href = fileVal;
+            link.target = '_blank';
+            link.setAttribute('download', '');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            // กรณีเก็บเป็นชื่อไฟล์ในเครื่องเซิร์ฟเวอร์ ให้เรียกผ่าน API ดาวน์โหลดของ Spring Boot
+            window.location.href = `/api/documents/${selectedDoc.id}/download`;
+        }
+    }
+
+    // 11. ยกเลิกเอกสาร (Soft Delete)
+    async function cancelDoc() {
+        if (!selectedDoc) return;
+        const confirmCancel = confirm(`คุณแน่ใจหรือไม่ว่าต้องการยกเลิกเอกสาร: ${selectedDoc.subject} (${selectedDoc.ref})?`);
+        if (!confirmCancel) return;
+
+        try {
+            const res = await fetch(`/api/documents/${selectedDoc.id}/cancel`, {
+                method: 'PATCH'
+            });
+
+            if (res.ok) {
+                alert("✅ ยกเลิกเอกสารสำเร็จ!");
+                goView('inbox');
+                await fetchDocumentsFromAPI();
+            } else {
+                const err = await res.text();
+                alert("❌ ไม่สามารถยกเลิกได้: " + err);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("❌ เชื่อมต่อเซิร์ฟเวอร์ขัดข้อง");
+        }
+    }
+
+    // 12. บันทึกการลงทะเบียนเอกสารใหม่
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const subject = document.getElementById('fSubject').value;
+        const senderName = document.getElementById('fSender').value;
+        const documentDate = document.getElementById('fDate').value;
+        const typeId = document.getElementById('fType').value;
+        const assignedTo = document.getElementById('assignedTo').value;
+        const fileInput = document.getElementById('fFile');
+
+        const formData = new FormData();
+        const autoRefNo = 'DOC-' + Date.now();
+        
+        formData.append('referenceNumber', autoRefNo);
+        formData.append('submissionChannel', 'ระบบ e-Mailbox');
+        formData.append('subject', subject);
+        formData.append('senderName', senderName);
+        formData.append('documentDate', documentDate);
+
+        if (typeId) formData.append('typeId', typeId);
+        if (assignedTo) formData.append('assignedTo', assignedTo);
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        try {
+            const res = await fetch('/api/documents', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                alert('✅ บันทึกเอกสารสำเร็จ!');
+                document.getElementById('registerForm').reset();
+                goView('inbox');
+                await fetchDocumentsFromAPI();
+            } else {
+                const errText = await res.text();
+                alert('❌ เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: ' + errText);
+            }
+        } catch (error) {
+            console.error('Error saving document:', error);
+            alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+        }
+    });
+
+    // 13. ออกจากระบบ
+    async function logout() {
+        await fetch('/api/logout', { method: 'POST' });
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+
+    // ผูก Event เวลาพิมพ์ค้นหาหรือเปลี่ยน Dropdown ประเภทเอกสารให้กรองทันที
+    document.addEventListener('DOMContentLoaded', () => {
+        checkStaffAuth();
+        document.getElementById('docSearch')?.addEventListener('input', applyFilter);
+        document.getElementById('docTypeFilter')?.addEventListener('change', applyFilter);
+    });
+  </script>
+</body>
+
+
+</html>

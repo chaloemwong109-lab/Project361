@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#9e1b2e">
+  <title>เข้าสู่ระบบ · e-Mailbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #2a1712;
+      --ink-soft: #6e5b52;
+      --line: #eddfb8;
+      --seal: #9e1b2e;
+      --seal-dark: #7d1424;
+      --gold: #b9872a;
+      --gold-soft: #faedcc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      grid-template-rows: 6px 1fr;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(250, 237, 204, .55), transparent 36%),
+        #fff;
+      color: var(--ink);
+      font-family: 'Noto Sans Thai', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .brand-stripe {
+      background: linear-gradient(to right, var(--seal) 0 50%, var(--gold) 50% 100%);
+    }
+
+    .page {
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+    }
+
+    .login-card {
+      width: min(100%, 440px);
+      padding: 40px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--seal);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 18px 55px rgba(42, 23, 18, .09);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 32px;
+    }
+
+    .seal {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 2px dashed var(--seal);
+      border-radius: 50%;
+      background: #f6dee1;
+      color: var(--seal);
+      font-size: 9px;
+      font-weight: 700;
+      transform: rotate(-6deg);
+    }
+
+    .brand-logo {
+      display: block;
+      width: 56px;
+      height: 60px;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .025em;
+    }
+
+    .brand-sub {
+      margin-top: 3px;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: 'Noto Serif Thai', serif;
+      font-size: 27px;
+      font-weight: 700;
+    }
+
+    .intro {
+      margin: 8px 0 26px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 13px;
+      border: 1px solid #d9c9b4;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input::placeholder {
+      color: #a8978d;
+    }
+
+    input:focus {
+      border-color: var(--seal);
+      outline: 0;
+      box-shadow: 0 0 0 3px rgba(158, 27, 46, .12);
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 4px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--seal);
+      color: #fff;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s ease, transform .15s ease;
+    }
+
+    .submit:hover {
+      background: var(--seal-dark);
+    }
+
+    .submit:active {
+      transform: translateY(1px);
+    }
+
+    .back-link {
+      display: block;
+      width: fit-content;
+      margin: 22px auto 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--seal);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 30px 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="brand-stripe" aria-hidden="true"></div>
+  <main class="page">
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="brand">
+        <img class="brand-logo" src="images/thammasat-logo.png" alt="ตราสัญลักษณ์มหาวิทยาลัยธรรมศาสตร์">
+        <div>
+          <div class="brand-name">ELECTRONIC MAILBOX &amp; DOCUMENT</div>
+          <div class="brand-sub">ระบบรับและกระจายเอกสารอิเล็กทรอนิกส์</div>
+        </div>
+      </div>
+
+      <h1 id="login-title">เข้าสู่ระบบ</h1>
+      <p class="intro">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">ชื่อผู้ใช้</label>
+          <input type="text" id="username" name="username" autocomplete="username"
+            placeholder="กรอกชื่อผู้ใช้" required>
+        </div>
+        <div class="field">
+          <label for="password">รหัสผ่าน</label>
+          <input type="password" id="password" name="password" autocomplete="current-password"
+            placeholder="กรอกรหัสผ่าน" required>
+        </div>
+
+        <!-- เพิ่มกล่องแสดงข้อความ Error เวลาล็อกอินไม่ผ่าน -->
+        <div id="errorMsg" style="color: #d9534f; font-size: 14px; margin-bottom: 15px; display: none; text-align: center;"></div>
+
+        <button class="submit" type="submit">เข้าสู่ระบบ</button>
+      </form>
+
+      <a class="back-link" href="index.html">← กลับหน้าข้อมูลทั่วไป</a>
+    </section>
+  </main>
+
+  <script>
+    
+    // ตรวจสอบว่าเคยล็อกอินค้างไว้หรือไม่ทันทีที่เปิดหน้าเว็บ
+    document.addEventListener('DOMContentLoaded', async function() {
+      const savedUser = sessionStorage.getItem('currentUser');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        window.location.href = (user.role === 'STAFF') ? 'staff.html' : 'teacher.html';
+        return; // หยุดการทำงานตรงนี้เลยถ้ามีข้อมูลแล้ว
+      }
+      try {
+        const res = await fetch('/api/current-user');
+        if (res.ok) {
+          const user = await res.json();
+          // ถ้ามี Session ล็อกอินอยู่แล้ว ให้พากลับไปหน้าทำงานตาม Role ทันที
+          if (user.role === 'STAFF') {
+            window.location.href = 'staff.html';
+          } else {
+            window.location.href = 'teacher.html';
+          }
+        }
+      } catch (err) {
+        // ถ้าเกิดข้อผิดพลาด หรือยังไม่ล็อกอิน ก็ปล่อยให้อยู่หน้าฟอร์ม Login ต่อไป
+        console.log("No active session, please login.");
+      }
+    });
+    
+    document.getElementById('loginForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      if (!this.reportValidity()) {
+        return;
+      }
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+
+      try {
+        // ยิงไปตรวจสอบที่ AuthController ใน Backend
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        });
+
+        if (response.ok) {
+          const user = await response.json();
+          // เก็บข้อมูลผู้ใช้ไว้ใน sessionStorage
+          sessionStorage.setItem('currentUser', JSON.stringify(user));
+
+          // แยกหน้าตาม Role ที่ได้จาก Database
+          if (user.role === 'STAFF') {
+            window.location.href = 'staff.html';
+          } else {
+            window.location.href = 'teacher.html';
+          }
+        } else {
+          const errorText = await response.text();
+          errorMsg.textContent = errorText || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+          errorMsg.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        errorMsg.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+
+</html>

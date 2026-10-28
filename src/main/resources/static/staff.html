@@ -10,6 +10,21 @@
     href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="status.js"></script>
+  <style>
+    .status-pill.status-overdue { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; font-weight: 700; }
+    .detail-grid-v4 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 900px) { .detail-grid-v4 { grid-template-columns: 1fr; } }
+    .side-card { background: #fff; border: 1px solid #e6dfd5; border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+    .side-card h3 { margin: 0 0 14px 0; font-size: 16px; color: #2c1810; }
+    .timeline-list { list-style: none; padding: 0; margin: 0; border-left: 2px solid #d4c5b9; margin-left: 8px; }
+    .timeline-item { position: relative; padding-left: 18px; margin-bottom: 16px; }
+    .timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #1e293b; }
+    .timeline-time { font-size: 12px; color: #8c7a6b; font-family: 'IBM Plex Mono', monospace; }
+    .timeline-action { font-weight: 600; color: #1e293b; margin: 2px 0; font-size: 14px; }
+    .timeline-by { font-size: 12.5px; color: #64748b; }
+    .timeline-comment { margin-top: 4px; padding: 6px 10px; background: #f8f5f0; border-radius: 6px; font-size: 12.5px; color: #475569; }
+  </style>
 </head>
 
 <body data-role="staff" data-read-only="false">
@@ -65,13 +80,14 @@
           </select>
         </div>
 
-        <!-- 🌟 เพิ่มแถวปุ่มกรองสถานะสำหรับ Staff -->
+        <!-- 🌟 แถวปุ่มกรองสถานะสำหรับ Staff (เพิ่มปุ่ม เกินกำหนด) -->
         <div class="doc-filter-row">
           <button class="doc-filter active" onclick="filterStaffByStatus('', event)">ทั้งหมด</button>
           <button class="doc-filter" onclick="filterStaffByStatus('รอรับเรื่อง', event)">รอรับเรื่อง</button>
           <button class="doc-filter" onclick="filterStaffByStatus('รับเรื่องแล้ว', event)">รับเรื่องแล้ว</button>
           <button class="doc-filter" onclick="filterStaffByStatus('กำลังดำเนินการ', event)">กำลังดำเนินการ</button>
           <button class="doc-filter" onclick="filterStaffByStatus('เสร็จสิ้น', event)">เสร็จสิ้น</button>
+          <button class="doc-filter" onclick="filterStaffByStatus('เกินกำหนด', event)">เกินกำหนด</button>
           <button class="doc-filter" onclick="filterStaffByStatus('ยกเลิกแล้ว', event)">ยกเลิกแล้ว</button>
         </div>
 
@@ -82,7 +98,7 @@
                 <th>เลขที่อ้างอิง</th>
                 <th>เรื่อง</th>
                 <th>ผู้ส่ง</th>
-                <th>วันที่</th>
+                <th>วันที่เอกสาร / กำหนดเสร็จ</th>
                 <th>สถานะ</th>
               </tr>
             </thead>
@@ -102,7 +118,7 @@
                 <input type="text" id="fSender" placeholder="ชื่อบุคคลหรือหน่วยงานต้นทาง" required>
               </div>
               <div class="field">
-                <label for="fDate">วันที่</label>
+                <label for="fDate">วันที่ตามเอกสาร</label>
                 <input type="date" id="fDate">
               </div>
               <div class="field full">
@@ -116,7 +132,7 @@
                 </select>
               </div>
               
-              <!-- ช่องเลือกผู้รับผิดชอบที่เพิ่มเข้ามา -->
+              <!-- ช่องเลือกผู้รับผิดชอบ -->
               <div class="field">
                 <label for="assignedTo">ผู้รับผิดชอบดำเนินการ</label>
                 <select id="assignedTo" name="assignedTo">
@@ -124,38 +140,80 @@
                 </select>
               </div>
 
+              <!-- 🌟 V4: เพิ่มช่องกำหนดวัน Deadline -->
+              <div class="field">
+                <label for="fDeadline">กำหนดเสร็จ (Deadline)</label>
+                <input type="date" id="fDeadline">
+              </div>
+
               <div class="field">
                 <label for="fFile">ไฟล์เอกสารแนบ</label>
                 <input type="file" id="fFile" accept=".pdf,image/*">
               </div>
+
+              <!-- 🌟 V4: เพิ่มกล่องคำอธิบายหรือหมายเหตุเพิ่มเติม -->
+              <div class="field full">
+                <label for="fDescription">คำอธิบาย / หมายเหตุเพิ่มเติม (ไม่บังคับ)</label>
+                <textarea id="fDescription" rows="3" placeholder="ระบุรายละเอียดเพิ่มเติมหรือสิ่งที่ต้องการให้ผู้รับผิดชอบดำเนินการ..." style="width:100%; padding:10px; border:1px solid #d4c5b9; border-radius:8px; font-family:inherit;"></textarea>
+              </div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn" style="margin-right:10px;" onclick="goView('inbox')">ยกเลิก</button>
-              <button type="submit" class="btn btn-primary">บันทึกเข้าระบบ</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitRegister">บันทึกเข้าระบบ</button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- ===== View: Detail (read-only) ===== -->
+      <!-- ===== View: Detail ===== -->
       <div id="view-detail" style="display:none;">
         <button class="btn" style="margin-bottom:18px;" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
-        <div class="detail-card">
-          <div class="mono detail-ref" id="detailRef"></div>
-          <h2 class="detail-subject" id="detailSubject"></h2>
-          <div class="detail-meta" id="detailMeta"></div>
-          <span class="status-pill" id="detailStatus"></span>
+        
+        <div class="detail-grid-v4">
+          <!-- คอลัมน์ซ้าย: รายละเอียดเอกสาร -->
+          <div class="detail-card">
+            <div class="mono detail-ref" id="detailRef"></div>
+            <h2 class="detail-subject" id="detailSubject"></h2>
+            <div class="detail-meta" id="detailMeta"></div>
+            <span class="status-pill" id="detailStatus"></span>
+            <span class="status-pill status-overdue" id="detailOverdueBadge" style="display:none; margin-left:6px;"> เกินกำหนด</span>
 
-          <div style="margin-top:22px;">
-            <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
-            <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
-            <div class="field-row"><span class="fname">วันที่</span><span class="fnote mono" id="detailDate"></span></div>
-            <div class="field-row"><span class="fname">ไฟล์แนบ</span><span class="fnote" id="detailFile"></span></div>
+            <div style="margin-top:22px;">
+              <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
+              <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
+              <div class="field-row"><span class="fname">วันที่ตามเอกสาร</span><span class="fnote mono" id="detailDate"></span></div>
+              <!-- 🌟 V4: วันที่รับเอกสารจาก created_at -->
+              <div class="field-row"><span class="fname">วันที่รับเอกสารเข้าระบบ</span><span class="fnote mono" id="detailCreatedAt"></span></div>
+              <!-- 🌟 V4: กำหนดเสร็จ (Deadline) -->
+              <div class="field-row"><span class="fname">กำหนดเสร็จ (Deadline)</span><span class="fnote mono" id="detailDeadline"></span></div>
+              <!-- 🌟 V4: ผู้ถือครองปัจจุบัน -->
+              <div class="field-row"><span class="fname">ผู้ถือครองปัจจุบัน</span><span class="fnote" id="detailAssignee"></span></div>
+              <!-- 🌟 V4: คำอธิบายเพิ่มเติม -->
+              <div class="field-row"><span class="fname">หมายเหตุ / คำอธิบาย</span><span class="fnote" id="detailDescription"></span></div>
+              <div class="field-row"><span class="fname">ไฟล์แนบ</span><span class="fnote" id="detailFile"></span></div>
+            </div>
+
+            <div class="detail-actions" style="margin-top:20px;">
+              <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()">⬇ ดาวน์โหลดเอกสาร</button>
+              <button class="btn btn-danger" id="btnCancel" onclick="cancelDoc()">ยกเลิกเอกสาร</button>
+            </div>
           </div>
 
-          <div class="detail-actions">
-            <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()">⬇ ดาวน์โหลดเอกสาร</button>
-            <button class="btn btn-danger" id="btnCancel" onclick="cancelDoc()">ยกเลิกเอกสาร</button>
+          <!-- คอลัมน์ขวา: ประวัติการดำเนินการ (FR7) และ ปรับกำหนดเวลา (FR8) -->
+          <div>
+            <div class="side-card">
+              <h3>🕒 ประวัติการดำเนินการ </h3>
+              <ul class="timeline-list" id="staffHistoryList">
+                <li class="timeline-item"><div class="timeline-by">กำลังโหลดประวัติ...</div></li>
+              </ul>
+            </div>
+
+            <div class="side-card" id="staffDeadlineCard">
+              <h3>📅 กำหนดเวลา </h3>
+              <label for="staffNewDeadline" style="display:block; font-size:13px; margin-bottom:6px; color:#555;">ปรับกำหนดเสร็จ</label>
+              <input type="date" id="staffNewDeadline" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-bottom:10px;">
+              <button class="btn" onclick="updateDeadlineByStaff()" style="border:1px solid #800000; color:#800000; background:#fff; cursor:pointer;">บันทึกกำหนดเวลาใหม่</button>
+            </div>
           </div>
         </div>
       </div>
@@ -168,6 +226,20 @@
     let selectedDoc = null;
     let staffStatusFilter = '';
     let docTypeMap = {};
+    let lecturerMap = {};
+
+    // แปลงวันที่จาก created_at (ISO) เป็น YYYY-MM-DD HH:mm
+    function formatDateTime(isoStr) {
+        if (!isoStr) return '-';
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    }
 
     // 1. ตรวจสอบสิทธิ์และโหลดข้อมูลเริ่มต้นทั้งหมด
     async function checkStaffAuth() {
@@ -184,7 +256,6 @@
             }
             document.getElementById('userNameDisplay').textContent = user.fullName;
             
-            // โหลดประเภทเอกสาร -> รายชื่ออาจารย์ -> รายการเอกสารตามลำดับ
             await loadDocumentTypes();
             await loadLecturersDropdown();
             await fetchDocumentsFromAPI();
@@ -194,7 +265,7 @@
         }
     }
 
-    // 2. โหลดประเภทเอกสารใส่ Dropdown ทั้งหน้าค้นหาและหน้าลงทะเบียน
+    // 2. โหลดประเภทเอกสารใส่ Dropdown
     async function loadDocumentTypes() {
         try {
             let res = await fetch('/api/documents/types');
@@ -232,7 +303,7 @@
         }
     }
 
-    // 3. ดึงรายชื่ออาจารย์มาใส่ใน Dropdown ผู้รับผิดชอบ
+    // 3. ดึงรายชื่ออาจารย์มาใส่ใน Dropdown ผู้รับผิดชอบ และเก็บใน Map
     async function loadLecturersDropdown() {
         try {
             const res = await fetch('/api/lecturers');
@@ -242,6 +313,7 @@
                 if (selectEl) {
                     selectEl.innerHTML = '<option value="">— ไม่ระบุ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>';
                     lecturers.forEach(lec => {
+                        lecturerMap[lec.id] = lec.fullName;
                         const opt = document.createElement('option');
                         opt.value = lec.id;
                         opt.textContent = `${lec.fullName} (${lec.username})`;
@@ -263,15 +335,22 @@
 
             allDocuments = data.map(dbDoc => {
                 let docTypeName = docTypeMap[dbDoc.typeId] || 'ไม่ระบุประเภท';
+                const overdue = isDocumentOverdue(dbDoc.deadline, dbDoc.status, dbDoc.currentStatus, dbDoc.isDeleted);
                 return {
                     id: dbDoc.documentId || dbDoc.id,
                     ref: dbDoc.referenceNumber || '-',
                     subject: dbDoc.subject || '-',
                     sender: dbDoc.senderName || '-',
                     date: dbDoc.documentDate || '-',
+                    createdAt: dbDoc.createdAt ? formatDateTime(dbDoc.createdAt) : '-',
+                    deadline: dbDoc.deadline || '-',
+                    description: dbDoc.description || '-',
+                    assignedTo: dbDoc.assignedTo,
+                    assigneeName: dbDoc.assignedTo ? (lecturerMap[dbDoc.assignedTo] || `รหัสผู้ใช้ ${dbDoc.assignedTo}`) : 'เอกสารทั่วไป (ไม่ระบุผู้รับผิดชอบ)',
                     status: dbDoc.currentStatus || 'รอรับเรื่อง',
                     rawStatus: dbDoc.status,
                     isDeleted: dbDoc.isDeleted,
+                    isOverdue: overdue,
                     typeId: dbDoc.typeId,
                     type: docTypeName,
                     fileName: dbDoc.attachmentFile || ''
@@ -292,7 +371,7 @@
         applyFilter();
     }
 
-    // 6. กรองข้อมูลรวม (ช่องค้นหา + ประเภทเอกสาร + ปุ่มสถานะ)
+    // 6. กรองข้อมูลรวม
     function applyFilter() {
         const searchEl = document.getElementById('docSearch');
         const typeEl = document.getElementById('docTypeFilter');
@@ -315,8 +394,10 @@
             if (staffStatusFilter) {
                 if (staffStatusFilter === 'ยกเลิกแล้ว') {
                     matchStatus = (doc.status === 'ยกเลิกแล้ว' || doc.status === 'ยกเลิก' || doc.rawStatus === 'CANCELED' || doc.isDeleted === true);
+                } else if (staffStatusFilter === 'เกินกำหนด') {
+                    matchStatus = doc.isOverdue === true;
                 } else {
-                    matchStatus = (doc.status === staffStatusFilter);
+                    matchStatus = (doc.status === staffStatusFilter && !doc.isDeleted);
                 }
             }
 
@@ -356,15 +437,21 @@
 
             if (isCanceled) tr.classList.add('is-cancelled');
 
+            const overdueTag = doc.isOverdue ? ` <span class="status-pill status-overdue" style="margin-left:4px;">เกินกำหนด</span>` : '';
+            const deadlineSub = (doc.deadline && doc.deadline !== '-') ? `<span class="cell-sub" style="color:${doc.isOverdue ? '#b91c1c' : '#8c7a6b'};">กำหนดเสร็จ: ${doc.deadline}</span>` : '';
+
             tr.innerHTML = `
                 <td class="mono">${doc.ref}</td>
                 <td>
                     <span style="color:var(--ink);font-weight:600;">${doc.subject}</span>
-                    <span class="cell-sub">${doc.type}</span>
+                    <span class="cell-sub">${doc.type} · ผู้รับผิดชอบ: ${doc.assigneeName}</span>
                 </td>
                 <td>${doc.sender}</td>
-                <td class="mono">${doc.date}</td>
-                <td><span class="status-pill${isCanceled ? ' cancelled' : ''}">${doc.status}</span></td>
+                <td class="mono">${doc.date}${deadlineSub}</td>
+                <td>
+                    <span class="status-pill${isCanceled ? ' cancelled' : ` ${getStatusPillClass(doc.status)}`}">${doc.status}</span>
+                    ${overdueTag}
+                </td>
             `;
             
             tr.addEventListener('click', () => showStaffDetail(doc));
@@ -373,7 +460,7 @@
     }
 
     // 8. แสดงหน้ารายละเอียดเอกสารเมื่อคลิกที่แถว
-    function showStaffDetail(doc) {
+    async function showStaffDetail(doc) {
         selectedDoc = doc;
         document.getElementById('detailRef').textContent = doc.ref;
         document.getElementById('detailSubject').textContent = doc.subject;
@@ -382,29 +469,88 @@
         const statusEl = document.getElementById('detailStatus');
         statusEl.textContent = doc.status;
         const isCanceled = (doc.rawStatus === 'CANCELED' || doc.status === 'ยกเลิกแล้ว' || doc.isDeleted === true);
-        statusEl.className = 'status-pill' + (isCanceled ? ' cancelled' : '');
+        statusEl.className = 'status-pill' + (isCanceled ? ' cancelled' : ` ${getStatusPillClass(doc.status)}`);
+
+        const overdueBadge = document.getElementById('detailOverdueBadge');
+        if (overdueBadge) overdueBadge.style.display = doc.isOverdue ? 'inline-block' : 'none';
 
         document.getElementById('detailSender').textContent = doc.sender;
         document.getElementById('detailType').textContent = doc.type;
         document.getElementById('detailDate').textContent = doc.date;
+        document.getElementById('detailCreatedAt').textContent = doc.createdAt;
+        document.getElementById('detailDeadline').textContent = doc.deadline;
+        document.getElementById('detailAssignee').textContent = doc.assigneeName;
+        document.getElementById('detailDescription').textContent = doc.description || '-';
 
-        // 🌟 เช็กว่ามีไฟล์แนบหรือไม่
+        const deadlineInput = document.getElementById('staffNewDeadline');
+        if (deadlineInput) deadlineInput.value = (doc.deadline && doc.deadline !== '-') ? doc.deadline : '';
+
         const hasFile = Boolean(doc.fileName && doc.fileName.trim() !== '' && doc.fileName !== '-');
         document.getElementById('detailFile').textContent = hasFile ? 'มีไฟล์แนบพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
 
-        // 🌟 ซ่อน/แสดง ปุ่มดาวน์โหลดตามจริง
         const btnDownload = document.getElementById('btnDownload');
-        if (btnDownload) {
-            btnDownload.style.display = hasFile ? 'inline-block' : 'none';
-        }
+        if (btnDownload) btnDownload.style.display = hasFile ? 'inline-block' : 'none';
 
-        // ซ่อนปุ่มยกเลิกถ้าเอกสารนี้ถูกยกเลิกไปแล้ว
         const btnCancel = document.getElementById('btnCancel');
-        if (btnCancel) {
-            btnCancel.style.display = isCanceled ? 'none' : 'inline-block';
-        }
+        if (btnCancel) btnCancel.style.display = isCanceled ? 'none' : 'inline-block';
 
         goView('detail');
+        await loadStaffDocumentHistory(doc.id);
+    }
+
+    // โหลดประวัติการดำเนินการ (FR7)
+    async function loadStaffDocumentHistory(docId) {
+        const listEl = document.getElementById('staffHistoryList');
+        if (!listEl) return;
+        listEl.innerHTML = '<li class="timeline-item"><div class="timeline-by">กำลังโหลดประวัติ...</div></li>';
+        try {
+            const res = await fetch(`/api/documents/${docId}/history`);
+            if (res.ok) {
+                const items = await res.json();
+                if (!items || items.length === 0) {
+                    listEl.innerHTML = '<li class="timeline-item"><div class="timeline-by">ยังไม่มีประวัติการดำเนินการ</div></li>';
+                    return;
+                }
+                listEl.innerHTML = items.map(h => `
+                    <li class="timeline-item">
+                        <div class="timeline-time">${formatDateTime(h.actionTime)}</div>
+                        <div class="timeline-action">${h.action}</div>
+                        <div class="timeline-by">โดย ${h.actionBy}</div>
+                        ${h.comment ? `<div class="timeline-comment">💬 ${h.comment}</div>` : ''}
+                    </li>
+                `).join('');
+            }
+        } catch (err) {
+            console.error('โหลดประวัติไม่สำเร็จ:', err);
+        }
+    }
+
+    // ปรับกำหนดเวลาจากฝั่งเจ้าหน้าที่ (FR8)
+    async function updateDeadlineByStaff() {
+        if (!selectedDoc) return;
+        const newDeadline = document.getElementById('staffNewDeadline')?.value;
+        if (!newDeadline) {
+            alert('กรุณาเลือกวันที่กำหนดเสร็จใหม่');
+            return;
+        }
+        try {
+            const res = await fetch(`/api/documents/${selectedDoc.id}/deadline`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deadline: newDeadline })
+            });
+            if (res.ok) {
+                alert('✅ บันทึกกำหนดเวลาใหม่เรียบร้อยแล้ว');
+                document.getElementById('detailDeadline').textContent = newDeadline;
+                await fetchDocumentsFromAPI();
+                await loadStaffDocumentHistory(selectedDoc.id);
+            } else {
+                alert('❌ ไม่สามารถปรับกำหนดเวลาได้: ' + await res.text());
+            }
+        } catch (err) {
+            console.error(err);
+            alert('❌ เชื่อมต่อเซิร์ฟเวอร์ขัดข้อง');
+        }
     }
 
     // 9. สลับหน้าจอ (Inbox / Register / Detail)
@@ -431,24 +577,10 @@
         }
     }
 
-    // 10. ดาวน์โหลดไฟล์แนบจริง
+    // 10. ดาวน์โหลดไฟล์แนบจริง (เรียกผ่าน Backend ที่ตรวจ Session เสมอเพื่อความปลอดภัย)
     function downloadFile() {
         if (!selectedDoc || !selectedDoc.fileName || selectedDoc.fileName === '-') return;
-        
-        const fileVal = selectedDoc.fileName.trim();
-        // กรณีเก็บเป็น Full URL (เช่น S3 URL) หรือ Path เต็ม
-        if (fileVal.startsWith('http://') || fileVal.startsWith('https://') || fileVal.startsWith('/')) {
-            const link = document.createElement('a');
-            link.href = fileVal;
-            link.target = '_blank';
-            link.setAttribute('download', '');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            // กรณีเก็บเป็นชื่อไฟล์ในเครื่องเซิร์ฟเวอร์ ให้เรียกผ่าน API ดาวน์โหลดของ Spring Boot
-            window.location.href = `/api/documents/${selectedDoc.id}/download`;
-        }
+        window.location.href = `/api/documents/${selectedDoc.id}/download`;
     }
 
     // 11. ยกเลิกเอกสาร (Soft Delete)
@@ -476,15 +608,23 @@
         }
     }
 
-    // 12. บันทึกการลงทะเบียนเอกสารใหม่
+    // 12. บันทึกการลงทะเบียนเอกสารใหม่ (พร้อมป้องกันการกดซ้ำ)
     document.getElementById('registerForm').addEventListener('submit', async function (event) {
         event.preventDefault();
+
+        const submitBtn = document.getElementById('btnSubmitRegister');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'กำลังบันทึก...';
+        }
 
         const subject = document.getElementById('fSubject').value;
         const senderName = document.getElementById('fSender').value;
         const documentDate = document.getElementById('fDate').value;
         const typeId = document.getElementById('fType').value;
         const assignedTo = document.getElementById('assignedTo').value;
+        const deadline = document.getElementById('fDeadline').value;
+        const description = document.getElementById('fDescription').value;
         const fileInput = document.getElementById('fFile');
 
         const formData = new FormData();
@@ -498,6 +638,8 @@
 
         if (typeId) formData.append('typeId', typeId);
         if (assignedTo) formData.append('assignedTo', assignedTo);
+        if (deadline) formData.append('deadline', deadline);
+        if (description) formData.append('description', description);
         if (fileInput && fileInput.files.length > 0) {
             formData.append('file', fileInput.files[0]);
         }
@@ -520,6 +662,11 @@
         } catch (error) {
             console.error('Error saving document:', error);
             alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'บันทึกเข้าระบบ';
+            }
         }
     });
 
@@ -530,7 +677,6 @@
         window.location.href = 'login.html';
     }
 
-    // ผูก Event เวลาพิมพ์ค้นหาหรือเปลี่ยน Dropdown ประเภทเอกสารให้กรองทันที
     document.addEventListener('DOMContentLoaded', () => {
         checkStaffAuth();
         document.getElementById('docSearch')?.addEventListener('input', applyFilter);
@@ -538,6 +684,5 @@
     });
   </script>
 </body>
-
 
 </html>

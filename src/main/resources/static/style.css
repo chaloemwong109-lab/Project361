@@ -816,6 +816,31 @@
     font-weight: 700;
   }
 
+  .status-pill.status-pending {
+    background: #FFF3CD;
+    color: #856404;
+  }
+
+  .status-pill.status-submitted {
+    background: #FFE0B2;
+    color: #A84B00;
+  }
+
+  .status-pill.status-in-progress {
+    background: #E8D5C4;
+    color: #6F4518;
+  }
+
+  .status-pill.status-completed {
+    background: #D4EDDA;
+    color: #155724;
+  }
+
+  .status-pill.status-forwarded {
+    background: #DCE8F5;
+    color: #315B86;
+  }
+
   .empty-state {
     padding: 44px 20px;
     text-align: center;

@@ -197,7 +197,7 @@ function renderDocs(list) {
       <td><span style="color:var(--ink);font-weight:600;">${escapeHtml(doc.subject || '-')}</span><span class="cell-sub">${escapeHtml(doc.type || '')}</span></td>
       <td>${escapeHtml(doc.senderName || doc.sender || '-')}</td>
       <td class="mono">${escapeHtml(doc.documentDate || doc.date || '-')}</td>
-      <td><span class="status-pill${isCanceled ? ' cancelled' : ''}">${escapeHtml(doc.currentStatus || doc.status)}</span></td>`;
+      <td><span class="status-pill${isCanceled ? ' cancelled' : ` ${getStatusPillClass(doc.currentStatus || doc.status)}`}">${escapeHtml(doc.currentStatus || doc.status)}</span></td>`;
     
     tr.addEventListener('click', () => goView('detail', doc.referenceNumber || doc.ref));
     tbody.appendChild(tr);
@@ -259,7 +259,8 @@ function renderDetail() {
   document.getElementById('detailMeta').textContent = `${doc.type} · จาก ${doc.sender}`;
   const st = document.getElementById('detailStatus');
   st.textContent = doc.status;
-  st.classList.toggle('cancelled', doc.status === 'ยกเลิก');
+  const isCanceled = doc.status === 'ยกเลิกแล้ว' || doc.status === 'ยกเลิก' || doc.rawStatus === 'CANCELED' || doc.isDeleted === true;
+  st.className = `status-pill${isCanceled ? ' cancelled' : ` ${getStatusPillClass(doc.status)}`}`;
   const hasFile = doc.fileName && doc.fileName !== '-';
   const isReadOnly = document.body.dataset.readOnly === 'true';
   const downloadBtn = document.getElementById('btnDownload');

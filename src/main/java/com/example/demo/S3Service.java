@@ -72,7 +72,7 @@ public class S3Service {
 
         software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest presignRequest = 
             software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest.builder()
-                .signatureDuration(java.time.Duration.ofMinutes(5))
+                .signatureDuration(java.time.Duration.ofSeconds(30))
                 .getObjectRequest(getObjectRequest)
                 .build();
 

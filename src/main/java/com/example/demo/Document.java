@@ -22,8 +22,12 @@ public class Document {
     private Integer typeId; 
     private Integer createdBy; 
     
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
     private Boolean isDeleted = false;
 
     // ฟิลด์สำหรับ V3 (ผู้รับผิดชอบ และ สถานะ)
@@ -33,9 +37,19 @@ public class Document {
     @Column(name = "status")
     private String status = "SUBMITTED"; // SUBMITTED, IN_PROGRESS, DONE
 
+    @Column(name = "forwarded_by")
+    private Long forwardedBy;
+
+    // ===== ฟิลด์ที่เพิ่มใหม่สำหรับ V4 =====
+    @Column(name = "deadline")
+    private String deadline; // เก็บรูปแบบ YYYY-MM-DD
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description; // คำอธิบายหรือหมายเหตุเพิ่มเติมตอนลงทะเบียน
+
     public Document() {}
 
-    // Getters and Setters
+    // Getters and Setters เดิมทั้งหมด
     public Integer getDocumentId() {
         return documentId;
     }
@@ -68,6 +82,7 @@ public class Document {
         return documentDate;
     }
     public void setDocumentDate(String documentDate) {
+        this.documentDate = documentId != null ? documentDate : documentDate;
         this.documentDate = documentDate;
     }
 
@@ -141,15 +156,25 @@ public class Document {
         this.status = status;
     }
 
-    @Column(name = "forwarded_by")
-    private Long forwardedBy;
-
     public Long getForwardedBy() {
         return forwardedBy;
     }
-
     public void setForwardedBy(Long forwardedBy) {
         this.forwardedBy = forwardedBy;
     }
 
+    // Getters and Setters สำหรับ V4
+    public String getDeadline() {
+        return deadline;
+    }
+    public void setDeadline(String deadline) {
+        this.deadline = deadline;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

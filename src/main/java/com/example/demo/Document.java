@@ -14,7 +14,6 @@ public class Document {
     private String referenceNumber;
     private String subject;
     private String senderName;
-    private String documentDate;
     private String submissionChannel;
     private String attachmentFile;
     private String currentStatus;
@@ -78,13 +77,6 @@ public class Document {
         this.senderName = senderName;
     }
 
-    public String getDocumentDate() {
-        return documentDate;
-    }
-    public void setDocumentDate(String documentDate) {
-        this.documentDate = documentId != null ? documentDate : documentDate;
-        this.documentDate = documentDate;
-    }
 
     public String getSubmissionChannel() {
         return submissionChannel;

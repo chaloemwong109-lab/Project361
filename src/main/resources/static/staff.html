@@ -98,7 +98,7 @@
                 <th>เลขที่อ้างอิง</th>
                 <th>เรื่อง</th>
                 <th>ผู้ส่ง</th>
-                <th>วันที่เอกสาร / กำหนดเสร็จ</th>
+                <th>วันที่รับเอกสาร / กำหนดเสร็จ</th>
                 <th>สถานะ</th>
               </tr>
             </thead>
@@ -116,10 +116,6 @@
               <div class="field">
                 <label for="fSender">ผู้ส่ง</label>
                 <input type="text" id="fSender" placeholder="ชื่อบุคคลหรือหน่วยงานต้นทาง" required>
-              </div>
-              <div class="field">
-                <label for="fDate">วันที่ตามเอกสาร</label>
-                <input type="date" id="fDate">
               </div>
               <div class="field full">
                 <label for="fSubject">เรื่อง</label>
@@ -181,7 +177,6 @@
             <div style="margin-top:22px;">
               <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
               <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
-              <div class="field-row"><span class="fname">วันที่ตามเอกสาร</span><span class="fnote mono" id="detailDate"></span></div>
               <!-- 🌟 V4: วันที่รับเอกสารจาก created_at -->
               <div class="field-row"><span class="fname">วันที่รับเอกสารเข้าระบบ</span><span class="fnote mono" id="detailCreatedAt"></span></div>
               <!-- 🌟 V4: กำหนดเสร็จ (Deadline) -->
@@ -437,8 +432,19 @@
 
             if (isCanceled) tr.classList.add('is-cancelled');
 
-            const overdueTag = doc.isOverdue ? ` <span class="status-pill status-overdue" style="margin-left:4px;">เกินกำหนด</span>` : '';
             const deadlineSub = (doc.deadline && doc.deadline !== '-') ? `<span class="cell-sub" style="color:${doc.isOverdue ? '#b91c1c' : '#8c7a6b'};">กำหนดเสร็จ: ${doc.deadline}</span>` : '';
+
+            // ป้ายสถานะเดี่ยวไม่ซ้อนกัน
+            let statusBadgeHtml = '';
+            if (isCanceled) {
+                statusBadgeHtml = `<span class="status-pill cancelled">ยกเลิกแล้ว</span>`;
+            } else if (doc.isOverdue) {
+                statusBadgeHtml = `<span class="status-pill status-overdue">เกินกำหนด</span>`;
+            } else {
+                statusBadgeHtml = `<span class="status-pill ${getStatusPillClass(doc.status)}">${doc.status}</span>`;
+            }
+
+            const receiveDate = doc.createdAt || '-';
 
             tr.innerHTML = `
                 <td class="mono">${doc.ref}</td>
@@ -447,11 +453,8 @@
                     <span class="cell-sub">${doc.type} · ผู้รับผิดชอบ: ${doc.assigneeName}</span>
                 </td>
                 <td>${doc.sender}</td>
-                <td class="mono">${doc.date}${deadlineSub}</td>
-                <td>
-                    <span class="status-pill${isCanceled ? ' cancelled' : ` ${getStatusPillClass(doc.status)}`}">${doc.status}</span>
-                    ${overdueTag}
-                </td>
+                <td class="mono">${receiveDate}${deadlineSub}</td>
+                <td>${statusBadgeHtml}</td>
             `;
             
             tr.addEventListener('click', () => showStaffDetail(doc));
@@ -467,26 +470,34 @@
         document.getElementById('detailMeta').textContent = `${doc.type} · จาก ${doc.sender}`;
         
         const statusEl = document.getElementById('detailStatus');
-        statusEl.textContent = doc.status;
         const isCanceled = (doc.rawStatus === 'CANCELED' || doc.status === 'ยกเลิกแล้ว' || doc.isDeleted === true);
-        statusEl.className = 'status-pill' + (isCanceled ? ' cancelled' : ` ${getStatusPillClass(doc.status)}`);
+        
+        if (isCanceled) {
+            statusEl.textContent = 'ยกเลิกแล้ว';
+            statusEl.className = 'status-pill cancelled';
+        } else if (doc.isOverdue) {
+            statusEl.textContent = 'เกินกำหนด';
+            statusEl.className = 'status-pill status-overdue';
+        } else {
+            statusEl.textContent = doc.status || doc.currentStatus;
+            statusEl.className = 'status-pill ' + getStatusPillClass(doc.status || doc.currentStatus);
+        }
 
         const overdueBadge = document.getElementById('detailOverdueBadge');
-        if (overdueBadge) overdueBadge.style.display = doc.isOverdue ? 'inline-block' : 'none';
+        if (overdueBadge) overdueBadge.style.display = 'none';
 
         document.getElementById('detailSender').textContent = doc.sender;
         document.getElementById('detailType').textContent = doc.type;
-        document.getElementById('detailDate').textContent = doc.date;
-        document.getElementById('detailCreatedAt').textContent = doc.createdAt;
-        document.getElementById('detailDeadline').textContent = doc.deadline;
-        document.getElementById('detailAssignee').textContent = doc.assigneeName;
-        document.getElementById('detailDescription').textContent = doc.description || '-';
+        if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt;
+        if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline;
+        if (document.getElementById('detailAssignee')) document.getElementById('detailAssignee').textContent = doc.assigneeName;
+        if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';
 
         const deadlineInput = document.getElementById('staffNewDeadline');
         if (deadlineInput) deadlineInput.value = (doc.deadline && doc.deadline !== '-') ? doc.deadline : '';
 
         const hasFile = Boolean(doc.fileName && doc.fileName.trim() !== '' && doc.fileName !== '-');
-        document.getElementById('detailFile').textContent = hasFile ? 'มีไฟล์แนบพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
+        if (document.getElementById('detailFile')) document.getElementById('detailFile').textContent = hasFile ? 'มีไฟล์แนบพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
 
         const btnDownload = document.getElementById('btnDownload');
         if (btnDownload) btnDownload.style.display = hasFile ? 'inline-block' : 'none';
@@ -541,7 +552,7 @@
             });
             if (res.ok) {
                 alert('✅ บันทึกกำหนดเวลาใหม่เรียบร้อยแล้ว');
-                document.getElementById('detailDeadline').textContent = newDeadline;
+                if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = newDeadline;
                 await fetchDocumentsFromAPI();
                 await loadStaffDocumentHistory(selectedDoc.id);
             } else {
@@ -577,7 +588,7 @@
         }
     }
 
-    // 10. ดาวน์โหลดไฟล์แนบจริง (เรียกผ่าน Backend ที่ตรวจ Session เสมอเพื่อความปลอดภัย)
+    // 10. ดาวน์โหลดไฟล์แนบจริง
     function downloadFile() {
         if (!selectedDoc || !selectedDoc.fileName || selectedDoc.fileName === '-') return;
         window.location.href = `/api/documents/${selectedDoc.id}/download`;
@@ -608,8 +619,8 @@
         }
     }
 
-    // 12. บันทึกการลงทะเบียนเอกสารใหม่ (พร้อมป้องกันการกดซ้ำ)
-    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+    // 12. บันทึกการลงทะเบียนเอกสารใหม่
+    document.getElementById('registerForm')?.addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const submitBtn = document.getElementById('btnSubmitRegister');
@@ -620,7 +631,6 @@
 
         const subject = document.getElementById('fSubject').value;
         const senderName = document.getElementById('fSender').value;
-        const documentDate = document.getElementById('fDate').value;
         const typeId = document.getElementById('fType').value;
         const assignedTo = document.getElementById('assignedTo').value;
         const deadline = document.getElementById('fDeadline').value;
@@ -629,12 +639,13 @@
 
         const formData = new FormData();
         const autoRefNo = 'DOC-' + Date.now();
+        const todayStr = new Date().toISOString().slice(0, 10);
         
         formData.append('referenceNumber', autoRefNo);
         formData.append('submissionChannel', 'ระบบ e-Mailbox');
         formData.append('subject', subject);
         formData.append('senderName', senderName);
-        formData.append('documentDate', documentDate);
+        formData.append('documentDate', todayStr);
 
         if (typeId) formData.append('typeId', typeId);
         if (assignedTo) formData.append('assignedTo', assignedTo);
@@ -682,7 +693,7 @@
         document.getElementById('docSearch')?.addEventListener('input', applyFilter);
         document.getElementById('docTypeFilter')?.addEventListener('change', applyFilter);
     });
-  </script>
+</script>
 </body>
 
 </html>

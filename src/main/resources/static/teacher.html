@@ -112,7 +112,7 @@
                 <th>เลขที่อ้างอิง</th>
                 <th>เรื่อง</th>
                 <th>ผู้ส่ง</th>
-                <th>วันที่เอกสาร / กำหนดเสร็จ</th>
+                <th>วันที่รับเอกสาร / กำหนดเสร็จ</th>
                 <th>สถานะ</th>
               </tr>
             </thead>
@@ -143,7 +143,6 @@
                 <div class="field-row"><span class="fname">ผู้ถือครองปัจจุบัน</span><span class="fnote" id="detailAssignee"></span></div>
                 <div class="field-row"><span class="fname">ผู้ส่ง / ต้นทาง</span><span class="fnote" id="detailSender"></span></div>
                 <div class="field-row"><span class="fname">ประเภทการเข้าถึง</span><span class="fnote" id="detailScope"></span></div>
-                <div class="field-row"><span class="fname">วันที่ตามเอกสาร</span><span class="fnote mono" id="detailDate"></span></div>
                 <div class="field-row"><span class="fname">หมายเหตุ / คำอธิบาย</span><span class="fnote" id="detailDescription"></span></div>
                 <div class="field-row">
                   <span class="fname">ไฟล์แนบ</span>
@@ -231,7 +230,7 @@
     </main>
   </div>
 
-  <script>
+ <script>
     let currentUser = null;
     let allDocuments = [];
     let selectedDoc = null;
@@ -383,11 +382,21 @@
           tagScope = '<span style="color:#6c757d; font-weight:bold; margin-left:8px;">[คุณส่งต่อแล้ว]</span>';
         }
 
-        const displayStatus = isForwarder ? 'ส่งต่อแล้ว (' + (doc.currentStatus || 'รอรับเรื่อง') + ')' : (doc.currentStatus || 'รอรับเรื่อง');
+        const displayStatus = isForwarder ? 'ส่งต่อแล้ว' : (doc.currentStatus || 'รอรับเรื่อง');
         const statusClass = getStatusPillClass(isForwarder ? 'ส่งต่อแล้ว' : (doc.currentStatus || doc.status || 'PENDING'));
         const typeName = docTypeMap[doc.typeId] || 'ไม่ระบุประเภท';
-        const overdueBadge = overdue ? ` <span class="status-pill status-overdue" style="margin-left:4px;">เกินกำหนด</span>` : '';
+        
         const deadlineSub = doc.deadline ? `<span class="cell-sub" style="display:block; font-size:11.5px; color:${overdue ? '#b91c1c' : '#8c7a6b'};">กำหนดเสร็จ: ${doc.deadline}</span>` : '';
+
+        // แสดงป้ายสถานะเพียงอันเดียวตามเงื่อนไข
+        let statusBadgeHtml = '';
+        if (overdue) {
+          statusBadgeHtml = `<span class="status-pill status-overdue">เกินกำหนด</span>`;
+        } else {
+          statusBadgeHtml = `<span class="status-pill ${statusClass}">${displayStatus}</span>`;
+        }
+
+        const receiveDate = doc.createdAt ? formatDateTime(doc.createdAt) : '-';
 
         tr.innerHTML = `
           <td class="mono">${doc.referenceNumber || '-'}</td>
@@ -396,8 +405,8 @@
             <span class="cell-sub" style="display:block; font-size:11.5px; color:#9E8C82; margin-top:2px;">${typeName}</span>
           </td>
           <td>${doc.senderName || '-'}</td>
-          <td class="mono">${doc.documentDate || '-'}${deadlineSub}</td>
-          <td><span class="status-pill ${statusClass}">${displayStatus}</span>${overdueBadge}</td>
+          <td class="mono">${receiveDate}${deadlineSub}</td>
+          <td>${statusBadgeHtml}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -458,7 +467,7 @@
       applyFilter();
     }
 
-    // อัปเดต Stepper 4 ขั้นตอน (FR4, FR5)
+    // อัปเดต Stepper (มีระบบตรวจจับ null เพื่อไม่ให้แครชกรณีลบ HTML ออกแล้ว)
     function updateStepperUI(doc) {
       const st = doc.status || 'PENDING';
       const steps = [1, 2, 3, 4];
@@ -508,27 +517,34 @@
       const overdue = isDocumentOverdue(doc.deadline, doc.status, doc.currentStatus, doc.isDeleted);
       const typeName = docTypeMap[doc.typeId] || 'ไม่ระบุประเภท';
 
-      document.getElementById('detailRef').textContent = doc.referenceNumber || 'ไม่มีเลขที่อ้างอิง';
-      document.getElementById('detailSubject').textContent = doc.subject || '-';
-      document.getElementById('detailMeta').textContent = `${typeName} · จาก ${doc.senderName || '-'}`;
-      document.getElementById('detailSender').textContent = doc.senderName || '-';
-      document.getElementById('detailDate').textContent = doc.documentDate || '-';
-      document.getElementById('detailCreatedAt').textContent = doc.createdAt ? formatDateOnly(doc.createdAt) : (doc.documentDate || '-');
-      document.getElementById('detailDeadline').textContent = doc.deadline || 'ไม่ได้กำหนด';
-      document.getElementById('detailDescription').textContent = doc.description || '-';
+      if (document.getElementById('detailRef')) document.getElementById('detailRef').textContent = doc.referenceNumber || 'ไม่มีเลขที่อ้างอิง';
+      if (document.getElementById('detailSubject')) document.getElementById('detailSubject').textContent = doc.subject || '-';
+      if (document.getElementById('detailMeta')) document.getElementById('detailMeta').textContent = `${typeName} · จาก ${doc.senderName || '-'}`;
+      if (document.getElementById('detailSender')) document.getElementById('detailSender').textContent = doc.senderName || '-';
+      if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt ? formatDateOnly(doc.createdAt) : (doc.documentDate || '-');
+      if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline || 'ไม่ได้กำหนด';
+      if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';
 
       const assigneeName = doc.assignedTo
         ? (lecturerMap[doc.assignedTo] || (isAssignee ? currentUser.fullName : `รหัสผู้ใช้ ${doc.assignedTo}`))
         : 'เอกสารทั่วไป (ไม่ระบุผู้รับผิดชอบ)';
-      document.getElementById('detailAssignee').textContent = assigneeName;
+      if (document.getElementById('detailAssignee')) document.getElementById('detailAssignee').textContent = assigneeName;
 
-      const detailStatus = document.getElementById('detailStatus');
-      const displayStatus = doc.currentStatus || 'รอรับเรื่อง';
-      detailStatus.textContent = displayStatus;
-      detailStatus.className = 'status-pill ' + getStatusPillClass(displayStatus);
+      // แสดงป้ายสถานะเดี่ยวไม่ซ้อนกัน
+      const statusEl = document.getElementById('detailStatus');
+      if (statusEl) {
+        if (overdue || doc.isOverdue) {
+          statusEl.textContent = 'เกินกำหนด';
+          statusEl.className = 'status-pill status-overdue';
+        } else {
+          const displayStatus = doc.currentStatus || 'รอรับเรื่อง';
+          statusEl.textContent = displayStatus;
+          statusEl.className = 'status-pill ' + getStatusPillClass(displayStatus);
+        }
+      }
 
       const overdueBadge = document.getElementById('detailOverdueBadge');
-      if (overdueBadge) overdueBadge.style.display = overdue ? 'inline-block' : 'none';
+      if (overdueBadge) overdueBadge.style.display = 'none';
       
       const scopeEl = document.getElementById('detailScope');
       if (scopeEl) {
@@ -542,7 +558,7 @@
       }
 
       const hasFile = Boolean(doc.attachmentFile && doc.attachmentFile.trim() !== '' && doc.attachmentFile !== '-');
-      document.getElementById('detailFile').textContent = hasFile ? 'เอกสารต้นฉบับพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
+      if (document.getElementById('detailFile')) document.getElementById('detailFile').textContent = hasFile ? 'เอกสารต้นฉบับพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
 
       const btnDownload = document.getElementById('btnDownload');
       if (btnDownload) {
@@ -614,8 +630,10 @@
           const updated = await res.json();
           selectedDoc = updated;
           const detailStatus = document.getElementById('detailStatus');
-          detailStatus.textContent = updated.currentStatus;
-          detailStatus.className = 'status-pill ' + getStatusPillClass(updated.currentStatus);
+          if (detailStatus) {
+            detailStatus.textContent = updated.currentStatus;
+            detailStatus.className = 'status-pill ' + getStatusPillClass(updated.currentStatus);
+          }
           updateStepperUI(updated);
           await loadDocuments();
           await loadTeacherDocumentHistory(docId);
@@ -689,7 +707,7 @@
         if (res.ok) {
           const updated = await res.json();
           selectedDoc = updated;
-          document.getElementById('detailDeadline').textContent = updated.deadline;
+          if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = updated.deadline;
           await loadDocuments();
           await loadTeacherDocumentHistory(docId);
           alert('✅ บันทึกกำหนดเวลาใหม่เรียบร้อยแล้ว');
@@ -702,7 +720,7 @@
       }
     }
 
-    // 11. ดาวน์โหลดไฟล์แนบจริง (เรียกผ่าน Endpoint ที่เช็กสิทธิ์เสมอ)
+    // 11. ดาวน์โหลดไฟล์แนบจริง
     function downloadFile() {
       if (!selectedDoc || !selectedDoc.attachmentFile || selectedDoc.attachmentFile === '-') return;
       const docId = selectedDoc.documentId || selectedDoc.id;
@@ -743,7 +761,7 @@
       goView('inbox');
       applyFilter();
     }
-  </script>
+</script>
 </body>
 
 </html>

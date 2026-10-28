@@ -62,7 +62,6 @@ public class DocumentController {
             @RequestParam("referenceNumber") String referenceNumber,
             @RequestParam("subject") String subject,
             @RequestParam("senderName") String senderName,
-            @RequestParam("documentDate") String documentDate,
             @RequestParam("submissionChannel") String submissionChannel,
             @RequestParam(value = "typeId", required = false) Integer typeId,
             @RequestParam(value = "assignedTo", required = false) Long assignedTo,
@@ -81,7 +80,6 @@ public class DocumentController {
             doc.setReferenceNumber(referenceNumber);
             doc.setSubject(subject);
             doc.setSenderName(senderName);
-            doc.setDocumentDate(documentDate);
             doc.setSubmissionChannel(submissionChannel);
             doc.setTypeId(typeId);
             doc.setAssignedTo(assignedTo); // null = เอกสารทั่วไป, มีค่า = มอบหมายให้อาจารย์

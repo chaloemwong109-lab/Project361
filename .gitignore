@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local UI preview only
+/src/main/resources/static/ui-preview.html
+
+# Disposable local simulator
+/.local-test/

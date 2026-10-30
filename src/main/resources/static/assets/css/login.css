@@ -1,0 +1,184 @@
+:root {
+      color-scheme: light;
+      --ink: #2a1712;
+      --ink-soft: #6e5b52;
+      --line: #eddfb8;
+      --seal: #9e1b2e;
+      --seal-dark: #7d1424;
+      --gold: #b9872a;
+      --gold-soft: #faedcc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      grid-template-rows: 6px 1fr;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(250, 237, 204, .55), transparent 36%),
+        #fff;
+      color: var(--ink);
+      font-family: 'Noto Sans Thai', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .brand-stripe {
+      background: linear-gradient(to right, var(--seal) 0 50%, var(--gold) 50% 100%);
+    }
+
+    .page {
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+    }
+
+    .login-card {
+      width: min(100%, 440px);
+      padding: 40px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--seal);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 18px 55px rgba(42, 23, 18, .09);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 32px;
+    }
+
+    .seal {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 2px dashed var(--seal);
+      border-radius: 50%;
+      background: #f6dee1;
+      color: var(--seal);
+      font-size: 9px;
+      font-weight: 700;
+      transform: rotate(-6deg);
+    }
+
+    .brand-logo {
+      display: block;
+      width: 56px;
+      height: 60px;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .025em;
+    }
+
+    .brand-sub {
+      margin-top: 3px;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: 'Noto Serif Thai', serif;
+      font-size: 27px;
+      font-weight: 700;
+    }
+
+    .intro {
+      margin: 8px 0 26px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 13px;
+      border: 1px solid #d9c9b4;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input::placeholder {
+      color: #a8978d;
+    }
+
+    input:focus {
+      border-color: var(--seal);
+      outline: 0;
+      box-shadow: 0 0 0 3px rgba(158, 27, 46, .12);
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 4px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--seal);
+      color: #fff;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s ease, transform .15s ease;
+    }
+
+    .submit:hover {
+      background: var(--seal-dark);
+    }
+
+    .submit:active {
+      transform: translateY(1px);
+    }
+
+    .back-link {
+      display: block;
+      width: fit-content;
+      margin: 22px auto 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--seal);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 30px 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }

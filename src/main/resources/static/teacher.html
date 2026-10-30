@@ -12,34 +12,181 @@
   <link rel="stylesheet" href="style.css">
   <script src="status.js"></script>
   <style>
-    .btn-status-progress { background-color: #17a2b8; color: white; border: none; }
-    .btn-status-done { background-color: #28a745; color: white; border: none; }
-    .btn-status-progress:hover { opacity: 0.9; }
-    .btn-status-done:hover { opacity: 0.9; }
-    .status-pill.status-overdue { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; font-weight: 700; }
+    .status-pill.status-overdue { 
+      background: #fee2e2; 
+      color: #b91c1c; 
+      border: 1px solid #f87171; 
+      font-weight: 700; 
+    }
 
-    /* เลย์เอาต์ 2 คอลัมน์ตามรูป Prototype V4 */
-    .detail-grid-v4 { display: grid; grid-template-columns: 1.65fr 1fr; gap: 20px; align-items: start; }
-    @media (max-width: 900px) { .detail-grid-v4 { grid-template-columns: 1fr; } }
-    .v4-card { background: #fff; border: 1px solid #e6dfd5; border-radius: 12px; padding: 22px; margin-bottom: 18px; }
-    .v4-card h3 { margin: 0 0 14px 0; font-size: 16px; color: #1e293b; font-weight: 700; }
+    /* เลย์เอาต์ 2 คอลัมน์ตามรูป UI ใหม่ */
+    .detail-grid-v4 { 
+      display: grid; 
+      grid-template-columns: 1.65fr 1fr; 
+      gap: 20px; 
+      align-items: start; 
+    }
+    @media (max-width: 900px) { 
+      .detail-grid-v4 { grid-template-columns: 1fr; } 
+    }
 
-    /* Stepper ขั้นตอนดำเนินการ (FR4, FR5) */
-    .stepper-row { display: flex; justify-content: space-around; align-items: center; padding: 14px 0 6px; text-align: center; }
-    .step-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; color: #64748b; }
-    .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; }
-    .step-item.done .step-circle { background: #15803d; color: #fff; border-color: #15803d; }
-    .step-item.active .step-circle { background: #800000; color: #fff; border-color: #800000; }
-    .step-item.active { color: #1e293b; font-weight: 700; }
+    .v4-card { 
+      background: #fff; 
+      border: 1px solid #e6dfd5; 
+      border-radius: 12px; 
+      padding: 22px; 
+      margin-bottom: 18px; 
+    }
+    .v4-card h3 { 
+      margin: 0 0 14px 0; 
+      font-size: 15px; 
+      color: #1e293b; 
+      font-weight: 700; 
+    }
+
+    /* ตารางกริดฟิลด์รายละเอียดเอกสาร */
+    .fields-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field-box-full {
+      grid-column: span 2;
+    }
+    .field-card-item {
+      background: #ffffff;
+      border: 1px solid #e2dcd5;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .field-card-label {
+      font-size: 11.5px;
+      color: #8c7e75;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .field-card-value {
+      font-size: 14px;
+      color: #1e293b;
+      font-weight: 500;
+      word-break: break-word;
+    }
+
+    /* ช่อง Input / Select */
+    .form-control-custom {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #dcd6cd;
+      border-radius: 8px;
+      background: #faf8f5;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: #1e293b;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .form-control-custom:focus {
+      border-color: #800000;
+      background: #ffffff;
+    }
+
+    /* ปุ่ม Action */
+    .btn-dark-action {
+      background: #172b4d;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-dark-action:hover {
+      background: #0f1d35;
+    }
+
+    .btn-outline-action {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-outline-action:hover {
+      background: #f8fafc;
+    }
 
     /* Timeline ประวัติการดำเนินการ (FR7) */
-    .timeline-list { list-style: none; padding: 0; margin: 0; border-left: 2px solid #d4c5b9; margin-left: 8px; }
-    .timeline-item { position: relative; padding-left: 18px; margin-bottom: 16px; }
-    .timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #1e293b; }
-    .timeline-time { font-size: 12px; color: #8c7a6b; font-family: 'IBM Plex Mono', monospace; }
-    .timeline-action { font-weight: 600; color: #1e293b; margin: 2px 0; font-size: 14px; }
-    .timeline-by { font-size: 12.5px; color: #64748b; }
-    .timeline-comment { margin-top: 4px; padding: 6px 10px; background: #f8f5f0; border-radius: 6px; font-size: 12.5px; color: #475569; }
+    .timeline-list { 
+      list-style: none; 
+      padding: 0; 
+      margin: 4px 0 0 6px; 
+      border-left: 2px solid #e2dcd5; 
+    }
+    .timeline-item { 
+      position: relative; 
+      padding-left: 18px; 
+      margin-bottom: 16px; 
+    }
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-item::before { 
+      content: ''; 
+      position: absolute; 
+      left: -6px; 
+      top: 4px; 
+      width: 10px; 
+      height: 10px; 
+      border-radius: 50%; 
+      background: #1e293b; 
+    }
+    .timeline-time { 
+      font-size: 11.5px; 
+      color: #8c7a6b; 
+      font-family: 'IBM Plex Mono', monospace; 
+    }
+    .timeline-action { 
+      font-weight: 600; 
+      color: #1e293b; 
+      margin: 2px 0; 
+      font-size: 13.5px; 
+    }
+    .timeline-by { 
+      font-size: 12px; 
+      color: #64748b; 
+    }
+    .timeline-comment { 
+      margin-top: 5px; 
+      padding: 6px 10px; 
+      background: #f8f6f2; 
+      border-radius: 6px; 
+      font-size: 12px; 
+      color: #475569; 
+    }
+
+    /* กล่องแสดงเลขที่เอกสารขวาบน */
+    .top-doc-ref-box {
+      background: #ffffff;
+      border: 1px solid #e5e0d8;
+      border-radius: 8px;
+      padding: 6px 14px;
+      text-align: right;
+    }
+    .top-doc-ref-label {
+      font-size: 10.5px;
+      color: #94a3b8;
+      display: block;
+    }
+    .top-doc-ref-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      font-family: 'IBM Plex Mono', monospace;
+    }
   </style>
 </head>
 
@@ -81,11 +228,17 @@
 
       <div class="app-topbar">
         <div>
-          <h1 id="appTitle">กล่องเอกสาร</h1>
+          <div style="font-size: 12px; color: #8c7e75; margin-bottom: 2px;">ระบบจัดการเอกสาร</div>
+          <h1 id="appTitle" style="margin: 0; font-size: 24px;">กล่องเอกสาร</h1>
           <div class="sub" id="appSub">เอกสารทั่วไปและเอกสารที่ได้รับมอบหมาย</div>
+        </div>
+        <div id="topRefBox" class="top-doc-ref-box" style="display: none;">
+          <span class="top-doc-ref-label">เลขที่เอกสาร</span>
+          <span class="top-doc-ref-val" id="topRefDisplay">-</span>
         </div>
       </div>
 
+      <!-- ===== View: Inbox ===== -->
       <div id="view-inbox">
         <div class="doc-search-bar">
           <input type="search" id="docSearch" placeholder="ค้นหาด้วยเลขที่อ้างอิง เรื่อง หรือผู้ส่ง" oninput="applyFilter()">
@@ -122,85 +275,126 @@
         <div class="empty-state" id="docEmpty">ยังไม่มีเอกสารในระบบสำหรับอาจารย์</div>
       </div>
 
-      <!-- ===== View: Detail (ออกแบบตามรูป Prototype V4) ===== -->
+      <!-- ===== View: Detail ===== -->
       <div id="view-detail" style="display:none;">
-        <button class="btn" style="margin-bottom:18px;" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
+        <button class="btn btn-outline-action" style="margin-bottom:18px;" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
 
         <div class="detail-grid-v4">
-          <!-- คอลัมน์ซ้าย -->
+          <!-- คอลัมน์ซ้าย (Left Column) -->
           <div>
-            <!-- การ์ดข้อมูลหลักของเอกสาร -->
-            <div class="detail-card" style="margin-bottom: 18px;">
-              <div class="mono detail-ref" id="detailRef"></div>
-              <h2 class="detail-subject" id="detailSubject"></h2>
-              <div class="detail-meta" id="detailMeta"></div>
-              <span class="status-pill" id="detailStatus"></span>
-              <span class="status-pill status-overdue" id="detailOverdueBadge" style="display:none; margin-left:6px;"> เกินกำหนด</span>
+            <!-- การ์ด 1: ข้อมูลหัวเรื่องและสถานะ -->
+            <div class="v4-card" style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="display: flex; gap: 14px; align-items: flex-start;">
+                <div style="font-size: 28px; line-height: 1; color: #800000; padding-top: 2px;">📄</div>
+                <div>
+                  <div class="mono" id="detailRef" style="font-size: 13px; color: #64748b; margin-bottom: 4px;"></div>
+                  <h2 id="detailSubject" style="margin: 0 0 6px 0; font-size: 20px; color: #1e293b; font-weight: 700;"></h2>
+                  <div id="detailMeta" style="font-size: 13px; color: #64748b;"></div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">สถานะปัจจุบัน</span>
+                <span class="status-pill" id="detailStatus"></span>
+                <span class="status-pill status-overdue" id="detailOverdueBadge" style="display:none; margin-left:4px;">เกินกำหนด</span>
+              </div>
+            </div>
 
-              <div style="margin-top:22px;">
-                <div class="field-row"><span class="fname">วันที่รับเอกสาร</span><span class="fnote mono" id="detailCreatedAt"></span></div>
-                <div class="field-row"><span class="fname">กำหนดเสร็จ (Deadline)</span><span class="fnote mono" id="detailDeadline"></span></div>
-                <div class="field-row"><span class="fname">ผู้ถือครองปัจจุบัน</span><span class="fnote" id="detailAssignee"></span></div>
-                <div class="field-row"><span class="fname">ผู้ส่ง / ต้นทาง</span><span class="fnote" id="detailSender"></span></div>
-                <div class="field-row"><span class="fname">ประเภทการเข้าถึง</span><span class="fnote" id="detailScope"></span></div>
-                <div class="field-row"><span class="fname">หมายเหตุ / คำอธิบาย</span><span class="fnote" id="detailDescription"></span></div>
-                <div class="field-row">
-                  <span class="fname">ไฟล์แนบ</span>
-                  <span class="fnote">
-                    <span id="detailFile"></span>
-                    <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()" style="margin-left:10px; padding:4px 12px; font-size:13px;">📎 ดาวน์โหลดไฟล์แนบ</button>
-                  </span>
+            <!-- การ์ด 2: รายละเอียดเอกสาร (Fields Grid 2 คอลัมน์) -->
+            <div class="v4-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">รายละเอียดเอกสาร</h3>
+                <span style="font-size: 12px; color: #94a3b8;">7 รายการ</span>
+              </div>
+
+              <div class="fields-grid-2col">
+                <div class="field-card-item">
+                  <span class="field-card-label">วันที่รับเอกสาร</span>
+                  <span class="field-card-value mono" id="detailCreatedAt">-</span>
+                </div>
+                <div class="field-card-item">
+                  <span class="field-card-label">กำหนดเสร็จ (Deadline)</span>
+                  <span class="field-card-value mono" id="detailDeadline">-</span>
+                </div>
+                <div class="field-card-item">
+                  <span class="field-card-label">ผู้ถือครองปัจจุบัน</span>
+                  <span class="field-card-value" id="detailAssignee">-</span>
+                </div>
+                <div class="field-card-item">
+                  <span class="field-card-label">ผู้ส่ง / ต้นทาง</span>
+                  <span class="field-card-value" id="detailSender">-</span>
+                </div>
+
+                <div class="field-card-item field-box-full">
+                  <span class="field-card-label">ประเภทการเข้าถึง</span>
+                  <span class="field-card-value" id="detailScope">-</span>
+                </div>
+
+                <div class="field-card-item field-box-full">
+                  <span class="field-card-label">หมายเหตุ / คำอธิบาย</span>
+                  <span class="field-card-value" id="detailDescription">-</span>
+                </div>
+
+                <div class="field-card-item field-box-full" style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <span class="field-card-label">ไฟล์แนบ</span>
+                    <span class="field-card-value" id="detailFile">ไม่มีไฟล์แนบ</span>
+                  </div>
+                  <button class="btn-outline-action" id="btnDownload" onclick="downloadFile()" style="display:none;">ดาวน์โหลดเอกสารต้นฉบับ</button>
                 </div>
               </div>
             </div>
 
-        
-
-            <!-- ชุดเครื่องมือจัดการเอกสาร: มอบหมาย / ส่งต่อ (FR3) และเปลี่ยนสถานะ -->
-            <div class="v4-card" id="actionSection" style="display: none;">
+            <!-- การ์ด 3: มอบหมาย / ส่งต่อ -->
+            <div class="v4-card" id="forwardCardSection" style="display: none;">
               <h3>มอบหมาย / ส่งต่อ</h3>
 
               <div style="margin-bottom: 14px;">
-                <label for="forwardDropdown" style="display:block; font-size:13.5px; font-weight:600; margin-bottom:6px;">ส่งต่อให้</label>
-                <select id="forwardDropdown" class="form-control" style="width:100%; padding: 10px; border-radius: 8px; border:1px solid #d4c5b9; background:#fdfbf7;">
-                  <option value="">-- เลือกอาจารย์/ผู้รับผิดชอบคนถัดไป --</option>
+                <label for="forwardDropdown" style="display:block; font-size:12.5px; font-weight:600; color:#475569; margin-bottom:6px;">ส่งต่อให้</label>
+                <select id="forwardDropdown" class="form-control-custom">
+                  <option value="">-- เลือกอาจารย์/เจ้าหน้าที่ --</option>
                 </select>
               </div>
 
               <div style="margin-bottom: 16px;">
-                <label for="forwardComment" style="display:block; font-size:13.5px; font-weight:600; margin-bottom:6px;">บันทึกเพิ่มเติม / ความคิดเห็นก่อนส่งต่อ (ไม่บังคับ)</label>
-                <textarea id="forwardComment" rows="3" placeholder="เช่น กรุณาพิจารณาและตอบกลับภายในวันที่กำหนด หรือ โปรดดำเนินการ" style="width:100%; padding:10px; border-radius:8px; border:1px solid #d4c5b9; background:#fdfbf7; font-family:inherit;"></textarea>
+                <label for="forwardComment" style="display:block; font-size:12.5px; font-weight:600; color:#475569; margin-bottom:6px;">บันทึกเพิ่มเติม / ความคิดเห็นก่อนส่งต่อ (ไม่บังคับ)</label>
+                <textarea id="forwardComment" rows="3" class="form-control-custom" placeholder="เช่น กรุณาพิจารณาและตอบกลับภายในวันที่กำหนด หรือ โปรดดำเนินการ"></textarea>
               </div>
 
-              <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                <button class="btn btn-primary" id="btnForwardDoc" onclick="forwardDocument()" style="background-color: #0f172a; color:#fff; border-radius:20px; padding:8px 20px;">ส่งต่อเอกสาร</button>
-
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <select id="statusDropdown" class="form-control" style="padding: 8px 14px; border-radius: 20px; border:1px solid #d4c5b9;" onchange="updateStatus(this.value)">
-                    <option value="PENDING" disabled hidden>เปลี่ยนสถานะ...</option>
-                    <option value="SUBMITTED">รับเรื่องแล้ว</option>
-                    <option value="IN_PROGRESS">กำลังดำเนินการ</option>
-                    <option value="DONE">เสร็จสิ้น</option>
-                  </select>
-                </div>
+              <div>
+                <button class="btn-dark-action" id="btnForwardDoc" onclick="forwardDocument()">ส่งต่อเอกสาร</button>
               </div>
             </div>
           </div>
 
-          <!-- คอลัมน์ขวา: ประวัติการดำเนินการ (FR7) และ กำหนดเวลา (FR8) -->
+          <!-- คอลัมน์ขวา (Right Column) -->
           <div>
+            <!-- การ์ดขวา 1: ประวัติการดำเนินการ (FR7) -->
             <div class="v4-card">
-              <h3>🕒 ประวัติการดำเนินการ </h3>
+              <h3>🕒 ประวัติการดำเนินการ</h3>
               <ul class="timeline-list" id="teacherHistoryList">
                 <li class="timeline-item"><div class="timeline-by">กำลังโหลดประวัติ...</div></li>
               </ul>
             </div>
 
-            <div class="v4-card" id="deadlineSection" style="display:none;">
-              <h3>⏰ กำหนดเวลา </h3>
-              <label for="teacherNewDeadline" style="display:block; font-size:13px; margin-bottom:6px; color:#555;">ปรับกำหนดเสร็จ</label>
-              <input type="date" id="teacherNewDeadline" style="width:100%; padding:9px; border:1px solid #d4c5b9; border-radius:8px; background:#fdfbf7; margin-bottom:12px;">
-              <button class="btn" onclick="updateDeadlineByTeacher()" style="border:1px solid #d4c5b9; border-radius:20px; padding:6px 16px; background:#fff; cursor:pointer; font-weight:600;">บันทึกกำหนดเวลาใหม่</button>
+            <!-- การ์ดขวา 2: กำหนดเวลา (FR8) -->
+            <div class="v4-card" id="deadlineCardSection" style="display:none;">
+              <h3>📅 กำหนดเวลา</h3>
+              <label for="teacherNewDeadline" style="display:block; font-size:12.5px; color:#475569; margin-bottom:6px;">ปรับกำหนดเสร็จ</label>
+              <input type="date" id="teacherNewDeadline" class="form-control-custom" style="margin-bottom:12px;">
+              <button class="btn-outline-action" onclick="updateDeadlineByTeacher()" style="width: 100%;">บันทึกกำหนดเวลาใหม่</button>
+            </div>
+
+            <!-- การ์ดขวา 3: อัปเดตสถานะเอกสาร -->
+            <div class="v4-card" id="statusCardSection" style="display:none;">
+              <h3>🟠 อัปเดตสถานะเอกสาร</h3>
+              <label for="statusDropdown" style="display:block; font-size:12.5px; color:#475569; margin-bottom:6px;">เลือกสถานะปัจจุบัน</label>
+              <select id="statusDropdown" class="form-control-custom" style="margin-bottom:14px;">
+                <option value="PENDING" disabled hidden>รอรับเรื่อง</option>
+                <option value="SUBMITTED">รับเรื่องแล้ว</option>
+                <option value="IN_PROGRESS">กำลังดำเนินการ</option>
+                <option value="DONE">เสร็จสิ้น</option>
+              </select>
+              <button class="btn-outline-action" onclick="saveStatusChange()" style="width: 100%;">บันทึกสถานะ</button>
             </div>
           </div>
         </div>
@@ -209,7 +403,7 @@
     </main>
   </div>
 
- <script>
+  <script>
     let currentUser = null;
     let allDocuments = [];
     let selectedDoc = null;
@@ -265,15 +459,11 @@
     async function loadDocumentTypesForTeacher() {
       try {
         let res = await fetch('/api/documents/types');
-        if (!res.ok) {
-          res = await fetch('/api/document-types');
-        }
+        if (!res.ok) res = await fetch('/api/document-types');
         if (res.ok) {
           const types = await res.json();
           const selectEl = document.getElementById('docTypeFilter');
-          if (selectEl) {
-            selectEl.innerHTML = '<option value="">ทุกประเภท</option>';
-          }
+          if (selectEl) selectEl.innerHTML = '<option value="">ทุกประเภท</option>';
 
           types.forEach(t => {
             const id = t.typeId || t.id;
@@ -375,7 +565,7 @@
           statusBadgeHtml = `<span class="status-pill ${statusClass}">${displayStatus}</span>`;
         }
 
-        const receiveDate = doc.createdAt ? formatDateTime(doc.createdAt) : '-';
+        const receiveDate = doc.createdAt ? formatDateOnly(doc.createdAt) : '-';
 
         tr.innerHTML = `
           <td class="mono">${doc.referenceNumber || '-'}</td>
@@ -446,49 +636,7 @@
       applyFilter();
     }
 
-    // อัปเดต Stepper (มีระบบตรวจจับ null เพื่อไม่ให้แครชกรณีลบ HTML ออกแล้ว)
-    function updateStepperUI(doc) {
-      const st = doc.status || 'PENDING';
-      const steps = [1, 2, 3, 4];
-      steps.forEach(n => {
-        const item = document.getElementById(`step-${n}`);
-        const circle = document.getElementById(`step-circle-${n}`);
-        if (item && circle) {
-          item.className = 'step-item';
-          circle.textContent = n;
-        }
-      });
-
-      const markDone = (n) => {
-        const item = document.getElementById(`step-${n}`);
-        const circle = document.getElementById(`step-circle-${n}`);
-        if (item && circle) { item.classList.add('done'); circle.textContent = '✓'; }
-      };
-      const markActive = (n) => {
-        const item = document.getElementById(`step-${n}`);
-        if (item) item.classList.add('active');
-      };
-
-      if (st === 'PENDING') {
-        markDone(1);
-        markActive(2);
-      } else if (st === 'SUBMITTED') {
-        markDone(1);
-        markDone(2);
-        markActive(2);
-      } else if (st === 'IN_PROGRESS') {
-        markDone(1);
-        markDone(2);
-        markActive(3);
-      } else if (st === 'DONE') {
-        markDone(1);
-        markDone(2);
-        markDone(3);
-        markDone(4);
-      }
-    }
-
-    // 8. แสดงหน้ารายละเอียดเอกสาร
+    // 8. แสดงหน้ารายละเอียดเอกสาร (ตรงตามรูปภาพ UI ใหม่)
     async function showDetail(doc) {
       selectedDoc = doc;
       const isAssignee = (currentUser && doc.assignedTo === currentUser.id);
@@ -496,27 +644,30 @@
       const overdue = isDocumentOverdue(doc.deadline, doc.status, doc.currentStatus, doc.isDeleted);
       const typeName = docTypeMap[doc.typeId] || 'ไม่ระบุประเภท';
 
+      // หัวเรื่องหลัก
       if (document.getElementById('detailRef')) document.getElementById('detailRef').textContent = doc.referenceNumber || 'ไม่มีเลขที่อ้างอิง';
       if (document.getElementById('detailSubject')) document.getElementById('detailSubject').textContent = doc.subject || '-';
       if (document.getElementById('detailMeta')) document.getElementById('detailMeta').textContent = `${typeName} · จาก ${doc.senderName || '-'}`;
-      if (document.getElementById('detailSender')) document.getElementById('detailSender').textContent = doc.senderName || '-';
-      if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt ? formatDateOnly(doc.createdAt) : (doc.documentDate || '-');
-      if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline || 'ไม่ได้กำหนด';
-      if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';
+      
+      // ป้ายเลขที่เอกสารขวาบนตามรูปภาพ
+      const topRefBox = document.getElementById('topRefBox');
+      const topRefDisplay = document.getElementById('topRefDisplay');
+      if (topRefBox && topRefDisplay) {
+        topRefDisplay.textContent = doc.referenceNumber || '-';
+        topRefBox.style.display = 'block';
+      }
 
-      const assigneeName = doc.assignedTo
-        ? (lecturerMap[doc.assignedTo] || (isAssignee ? currentUser.fullName : `รหัสผู้ใช้ ${doc.assignedTo}`))
-        : 'เอกสารทั่วไป (ไม่ระบุผู้รับผิดชอบ)';
-      if (document.getElementById('detailAssignee')) document.getElementById('detailAssignee').textContent = assigneeName;
-
-      // แสดงป้ายสถานะเดี่ยวไม่ซ้อนกัน
+      // สถานะเดี่ยวไม่ซ้อนกัน
       const statusEl = document.getElementById('detailStatus');
       if (statusEl) {
-        if (overdue || doc.isOverdue) {
+        if (doc.rawStatus === 'CANCELED' || doc.isDeleted === true) {
+          statusEl.textContent = 'ยกเลิกแล้ว';
+          statusEl.className = 'status-pill cancelled';
+        } else if (overdue || doc.isOverdue) {
           statusEl.textContent = 'เกินกำหนด';
           statusEl.className = 'status-pill status-overdue';
         } else {
-          const displayStatus = doc.currentStatus || 'รอรับเรื่อง';
+          const displayStatus = isForwarder ? 'ส่งต่อแล้ว' : (doc.currentStatus || 'รอรับเรื่อง');
           statusEl.textContent = displayStatus;
           statusEl.className = 'status-pill ' + getStatusPillClass(displayStatus);
         }
@@ -524,43 +675,61 @@
 
       const overdueBadge = document.getElementById('detailOverdueBadge');
       if (overdueBadge) overdueBadge.style.display = 'none';
-      
+
+      // ฟิลด์ในการ์ดรายละเอียดเอกสาร
+      if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt ? formatDateOnly(doc.createdAt) : (doc.documentDate || '-');
+      if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline || 'ไม่ได้กำหนด';
+      if (document.getElementById('detailSender')) document.getElementById('detailSender').textContent = doc.senderName || '-';
+      if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';
+
+      const assigneeName = doc.assignedTo
+        ? (lecturerMap[doc.assignedTo] || (isAssignee ? currentUser.fullName : `รหัสผู้ใช้ ${doc.assignedTo}`))
+        : 'เอกสารทั่วไป (ไม่ระบุผู้รับผิดชอบ)';
+      if (document.getElementById('detailAssignee')) document.getElementById('detailAssignee').textContent = assigneeName;
+
       const scopeEl = document.getElementById('detailScope');
       if (scopeEl) {
         if (isAssignee) {
-          scopeEl.innerHTML = '<b style="color: #e83e8c;">งานที่คุณเป็นผู้รับผิดชอบโดยตรง</b>';
+          scopeEl.innerHTML = '<span style="color: #c2410c; font-weight:600;">งานที่คุณเป็นผู้รับผิดชอบโดยตรง</span>';
         } else if (isForwarder) {
-          scopeEl.innerHTML = '<b style="color: #6c757d;">งานที่คุณได้ส่งต่อให้ผู้อื่นแล้ว (ติดตามความคืบหน้าได้)</b>';
+          scopeEl.innerHTML = '<span style="color: #64748b; font-weight:600;">งานที่คุณได้ส่งต่อให้ผู้อื่นแล้ว</span>';
         } else {
-          scopeEl.innerHTML = '<span style="color: #007bff;">เอกสารประกาศทั่วไป</span>';
+          scopeEl.innerHTML = '<span style="color: #0284c7; font-weight:600;">เอกสารประกาศทั่วไป</span>';
         }
       }
 
+      // ไฟล์แนบ
       const hasFile = Boolean(doc.attachmentFile && doc.attachmentFile.trim() !== '' && doc.attachmentFile !== '-');
-      if (document.getElementById('detailFile')) document.getElementById('detailFile').textContent = hasFile ? 'เอกสารต้นฉบับพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
+      if (document.getElementById('detailFile')) {
+        document.getElementById('detailFile').textContent = hasFile ? 'เอกสารต้นฉบับพร้อมดาวน์โหลด' : 'ไม่มีไฟล์แนบ';
+      }
 
       const btnDownload = document.getElementById('btnDownload');
       if (btnDownload) {
         btnDownload.style.display = hasFile ? 'inline-block' : 'none';
       }
 
-      updateStepperUI(doc);
-
-      const actionSection = document.getElementById('actionSection');
+      // แสดง/ซ่อน กล่องจัดการเอกสาร (เฉพาะผู้รับผิดชอบปัจจุบัน)
+      const forwardSection = document.getElementById('forwardCardSection');
+      const deadlineSection = document.getElementById('deadlineCardSection');
+      const statusSection = document.getElementById('statusCardSection');
       const statusDropdown = document.getElementById('statusDropdown');
-      const deadlineSection = document.getElementById('deadlineSection');
       const teacherNewDeadline = document.getElementById('teacherNewDeadline');
 
-      if (actionSection && statusDropdown) {
-        if (isAssignee) {
-          actionSection.style.display = 'block';
-          statusDropdown.value = doc.status || 'PENDING';
-          if (deadlineSection) deadlineSection.style.display = 'block';
+      if (isAssignee && !doc.isDeleted) {
+        if (forwardSection) forwardSection.style.display = 'block';
+        if (deadlineSection) {
+          deadlineSection.style.display = 'block';
           if (teacherNewDeadline) teacherNewDeadline.value = doc.deadline || '';
-        } else {
-          actionSection.style.display = 'none';
-          if (deadlineSection) deadlineSection.style.display = 'none';
         }
+        if (statusSection) {
+          statusSection.style.display = 'block';
+          if (statusDropdown) statusDropdown.value = doc.status || 'PENDING';
+        }
+      } else {
+        if (forwardSection) forwardSection.style.display = 'none';
+        if (deadlineSection) deadlineSection.style.display = 'none';
+        if (statusSection) statusSection.style.display = 'none';
       }
 
       goView('detail');
@@ -568,7 +737,7 @@
       await loadTeacherDocumentHistory(docId);
     }
 
-    // โหลดประวัติการดำเนินการ (FR7)
+    // 9. โหลดประวัติการดำเนินการ (FR7)
     async function loadTeacherDocumentHistory(docId) {
       const listEl = document.getElementById('teacherHistoryList');
       if (!listEl) return;
@@ -595,9 +764,13 @@
       }
     }
 
-    // 9. อัปเดตสถานะเอกสาร
-    async function updateStatus(newStatus) {
+    // 10. บันทึกการเปลี่ยนสถานะเอกสาร
+    async function saveStatusChange() {
       if (!selectedDoc) return;
+      const statusDropdown = document.getElementById('statusDropdown');
+      const newStatus = statusDropdown ? statusDropdown.value : '';
+      if (!newStatus) return;
+
       try {
         const docId = selectedDoc.documentId || selectedDoc.id;
         const res = await fetch(`/api/documents/${docId}/status`, {
@@ -608,15 +781,9 @@
         if (res.ok) {
           const updated = await res.json();
           selectedDoc = updated;
-          const detailStatus = document.getElementById('detailStatus');
-          if (detailStatus) {
-            detailStatus.textContent = updated.currentStatus;
-            detailStatus.className = 'status-pill ' + getStatusPillClass(updated.currentStatus);
-          }
-          updateStepperUI(updated);
-          await loadDocuments();
-          await loadTeacherDocumentHistory(docId);
           alert('✅ อัปเดตสถานะเป็น "' + updated.currentStatus + '" เรียบร้อยแล้ว');
+          await loadDocuments();
+          await showDetail(updated);
         } else {
           alert('❌ ไม่สามารถเปลี่ยนสถานะได้: ' + await res.text());
         }
@@ -626,14 +793,14 @@
       }
     }
 
-    // 10. ส่งต่อเอกสารให้อาจารย์ท่านอื่น พร้อมแนบความคิดเห็น (FR3)
+    // 11. ส่งต่อเอกสารให้อาจารย์ท่านอื่น พร้อมแนบความคิดเห็น (FR3)
     async function forwardDocument() {
       if (!selectedDoc) return;
       const newAssignee = document.getElementById('forwardDropdown')?.value;
       const comment = document.getElementById('forwardComment')?.value || '';
 
       if (!newAssignee) {
-        alert('กรุณาเลือกอาจารย์ที่ต้องการส่งต่อเอกสารให้');
+        alert('กรุณาเลือกอาจารย์หรือผู้รับผิดชอบที่ต้องการส่งต่อให้');
         return;
       }
       if (!confirm('คุณต้องการส่งต่อเอกสารนี้ใช่หรือไม่?')) return;
@@ -653,7 +820,7 @@
         });
         if (res.ok) {
           const updated = await res.json();
-          alert('✅ ส่งต่อเอกสารเรียบร้อยแล้ว! คุณยังสามารถดูประวัติและความคืบหน้าของเอกสารนี้ได้');
+          alert('✅ ส่งต่อเอกสารเรียบร้อยแล้ว!');
           if (document.getElementById('forwardComment')) document.getElementById('forwardComment').value = '';
           await loadDocuments();
           await showDetail(updated);
@@ -668,7 +835,7 @@
       }
     }
 
-    // ปรับกำหนดเวลา Deadline สำหรับผู้รับผิดชอบ (FR8)
+    // 12. ปรับกำหนดเวลา Deadline สำหรับผู้รับผิดชอบ (FR8)
     async function updateDeadlineByTeacher() {
       if (!selectedDoc) return;
       const newDeadline = document.getElementById('teacherNewDeadline')?.value;
@@ -699,20 +866,25 @@
       }
     }
 
-    // 11. ดาวน์โหลดไฟล์แนบจริง
+    // 13. ดาวน์โหลดไฟล์แนบจริง
     function downloadFile() {
       if (!selectedDoc || !selectedDoc.attachmentFile || selectedDoc.attachmentFile === '-') return;
       const docId = selectedDoc.documentId || selectedDoc.id;
       window.location.href = `/api/documents/${docId}/download`;
     }
 
-    // 12. สลับหน้าจอ Inbox <-> Detail
+    // 14. สลับหน้าจอ Inbox <-> Detail
     function goView(view) {
       document.getElementById('view-inbox').style.display = (view === 'inbox') ? 'block' : 'none';
       document.getElementById('view-detail').style.display = (view === 'detail') ? 'block' : 'none';
+
+      const topRefBox = document.getElementById('topRefBox');
+      if (topRefBox && view === 'inbox') {
+        topRefBox.style.display = 'none';
+      }
     }
 
-    // 13. ออกจากระบบ
+    // 15. ออกจากระบบ
     async function logout() {
       await fetch('/api/logout', { method: 'POST' });
       sessionStorage.clear();
@@ -740,7 +912,7 @@
       goView('inbox');
       applyFilter();
     }
-</script>
+  </script>
 </body>
 
 </html>

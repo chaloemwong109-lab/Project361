@@ -44,14 +44,13 @@ public class DocumentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("กรุณาเข้าสู่ระบบก่อนใช้งาน");
         }
 
-        List<Document> docs;
-        if ("STAFF".equals(currentUser.getRole())) {
-            // ถ้าเป็นเจ้าหน้าที่ ให้เห็นเอกสารทั้งหมด
-            docs = documentRepository.findAll();
-        } else {
-            // ถ้าเป็นอาจารย์/เจ้าหน้าที่ทั่วไป ให้เห็นเฉพาะเอกสารทั่วไป + เอกสารที่ได้รับมอบหมาย หรือเคยส่งต่อ
-            docs = documentRepository.findVisibleDocumentsForUser(currentUser.getId(), currentUser.getFullName());
-        }
+        boolean canViewAll = "STAFF".equals(currentUser.getRole())
+                || "MANAGER".equals(currentUser.getRole());
+
+        List<Document> docs = canViewAll
+                ? documentRepository.findAll()
+                : documentRepository.findVisibleDocumentsForUser(
+                    currentUser.getId(), currentUser.getFullName());
 
         return ResponseEntity.ok(docs);
     }
@@ -168,17 +167,25 @@ public class DocumentController {
         String comment = body.get("comment");
         if (newStatus != null) {
             doc.setStatus(newStatus);
-            if ("SUBMITTED".equals(newStatus)) {
-                doc.setCurrentStatus("รับเรื่องแล้ว");
-            } else if ("IN_PROGRESS".equals(newStatus)) {
-                doc.setCurrentStatus("กำลังดำเนินการ");
-            } else if ("DONE".equals(newStatus)) {
-                doc.setCurrentStatus("เสร็จสิ้น");
-            } else if ("FORWARDED".equals(newStatus)) {
-                doc.setCurrentStatus("ส่งต่อแล้ว");
-            } else {
-                doc.setCurrentStatus("รอรับเรื่อง"); // กรณี PENDING
+            
+        if ("SUBMITTED".equals(newStatus)) {
+            doc.setCurrentStatus("รับเรื่องแล้ว");
+            doc.setCompletedAt(null);
+        } else if ("IN_PROGRESS".equals(newStatus)) {
+            doc.setCurrentStatus("กำลังดำเนินการ");
+            doc.setCompletedAt(null);
+        } else if ("DONE".equals(newStatus)) {
+            doc.setCurrentStatus("เสร็จสิ้น");
+        if (doc.getCompletedAt() == null) {
+            doc.setCompletedAt(LocalDateTime.now());
             }
+        } else if ("FORWARDED".equals(newStatus)) {
+            doc.setCurrentStatus("ส่งต่อแล้ว");
+            doc.setCompletedAt(null);
+        } else {
+            doc.setCurrentStatus("รอรับเรื่อง");
+            doc.setCompletedAt(null);
+        }
             doc.setUpdatedAt(LocalDateTime.now());
             documentRepository.save(doc);
 
@@ -351,7 +358,8 @@ public class DocumentController {
         }
 
         // 🌟 ด่านที่ 3 (เพิ่มใหม่): ตรวจสอบสิทธิ์การเข้าถึงเอกสารเฉพาะบุคคล (Prevent Unauthorized Access)
-        boolean isStaff = "STAFF".equals(currentUser.getRole());
+        boolean hasFullDocumentAccess = "STAFF".equals(currentUser.getRole())
+        || "MANAGER".equals(currentUser.getRole());
         boolean isPublicDoc = (doc.getAssignedTo() == null);
         boolean isAssignee = (doc.getAssignedTo() != null && doc.getAssignedTo().equals(currentUser.getId()));
         boolean isForwarder = (doc.getForwardedBy() != null && doc.getForwardedBy().equals(currentUser.getId()));
@@ -359,7 +367,7 @@ public class DocumentController {
                 .stream()
                 .anyMatch(h -> h.getActionBy() != null && h.getActionBy().contains(currentUser.getFullName()));
 
-        if (!isStaff && !isPublicDoc && !isAssignee && !isForwarder && !isInHistory) {
+        if (!hasFullDocumentAccess && !isPublicDoc && !isAssignee && !isForwarder && !isInHistory) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("คุณไม่มีสิทธิ์ดาวน์โหลดไฟล์แนบของเอกสารนี้ (เฉพาะผู้รับผิดชอบที่เกี่ยวข้องเท่านั้น)");
         }

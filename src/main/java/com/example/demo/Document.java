@@ -26,6 +26,10 @@ public class Document {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
     
     private Boolean isDeleted = false;
 
@@ -169,4 +173,13 @@ public class Document {
     public void setDescription(String description) {
         this.description = description;
     }
+    
+    public LocalDateTime getCompletedAt() {
+    return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+    this.completedAt = completedAt;
+    }
+
 }

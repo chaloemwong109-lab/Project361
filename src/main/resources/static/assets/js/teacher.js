@@ -38,6 +38,18 @@ let currentUser = null;
           return;
         }
 
+        if (currentUser.role === 'MANAGER') {
+          window.location.href = 'manager.html';
+          return;
+        }
+
+        if (currentUser.role !== 'LECTURER') {
+            await fetch('/api/logout', { method: 'POST' });
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+            return;
+        }
+
         const nameEl = document.getElementById('teacherNameDisplay');
         if (nameEl) nameEl.textContent = currentUser.fullName;
 

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พื้นที่ทำงานผู้บริหาร</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/manager.css">
+  <link rel="stylesheet" href="assets/css/workspace.css">
+  <script src="assets/js/status.js"></script>
+</head>
+
+<body data-role="manager" data-read-only="true">
+  <div class="brand-stripe" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="images/thammasat-logo.png" alt="ตราสัญลักษณ์มหาวิทยาลัยธรรมศาสตร์">
+        <div>
+          <div class="brand-name">e-Mailbox</div>
+          <div class="brand-sub">สาขาวิชาวิทยาการคอมพิวเตอร์</div>
+        </div>
+      </div>
+
+<nav>
+  <button class="app-nav-item active" data-view="inbox" onclick="goView('inbox')">
+    <span>
+      <svg class="ui-icon" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.6"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 4h16v16H4z M4 13h4l2 3h4l2-3h4 M12 4v7 m-3-3 3 3 3-3"/>
+      </svg>
+    </span>
+    กล่องเอกสาร
+  </button>
+
+  <button class="app-nav-item" data-view="dashboard" onclick="goView('dashboard')">
+    <span>
+      <svg class="ui-icon" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.6"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2"/>
+      </svg>
+    </span>
+    แดชบอร์ดสรุป
+  </button>
+</nav>
+
+      <div class="app-sidebar-foot">
+        <div class="app-role-chip">
+  <span>
+    <svg class="ui-icon" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/>
+      <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
+    </svg>
+  </span>
+  <div>
+    <b>ผู้บริหาร</b>
+    <span id="userNameDisplay">กำลังโหลด...</span>
+  </div>
+</div>
+        <button onclick="logout()" class="btn manager-logout">ออกจากระบบ</button>
+        <a class="app-back-link" href="index.html">← กลับหน้าข้อมูลทั่วไป</a>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div class="app-topbar">
+        <div>
+          <h1 id="appTitle">กล่องเอกสาร</h1>
+          <div class="sub" id="appSub">เอกสารทั้งหมดในระบบ (ดูอย่างเดียว)</div>
+        </div>
+      </div>
+
+      <section id="view-inbox">
+        <div class="doc-search-bar">
+          <input type="search" id="docSearch" aria-label="ค้นหาเอกสาร" placeholder="ค้นหาเลขที่อ้างอิง เรื่อง ผู้ส่ง หรือประเภท">
+          <select id="docTypeFilter" aria-label="กรองประเภทเอกสาร"><option value="">ทุกประเภท</option></select>
+        </div>
+        <div class="doc-filter-row">
+          <button class="doc-filter active" onclick="filterByStatus('', event)">ทั้งหมด</button>
+          <button class="doc-filter" onclick="filterByStatus('รอรับเรื่อง', event)">รอรับเรื่อง</button>
+          <button class="doc-filter" onclick="filterByStatus('กำลังดำเนินการ', event)">กำลังดำเนินการ</button>
+          <button class="doc-filter" onclick="filterByStatus('เสร็จสิ้น', event)">เสร็จสิ้น</button>
+          <button class="doc-filter" onclick="filterByStatus('เกินกำหนด', event)">เกินกำหนด</button>
+          <button class="doc-filter" onclick="filterByStatus('ยกเลิกแล้ว', event)">ยกเลิกแล้ว</button>
+        </div>
+        <div class="doc-table-wrap" id="docTableWrap">
+          <table class="doc-table">
+            <thead><tr><th>เลขที่อ้างอิง</th><th>เรื่อง</th><th>ผู้ส่ง</th><th>วันที่รับ / กำหนดเสร็จ</th><th>สถานะ</th><th>ผู้ถือครองปัจจุบัน</th></tr></thead>
+            <tbody id="docTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="docEmpty">ไม่พบเอกสารตามเงื่อนไขที่เลือก</div>
+      </section>
+
+      <section id="view-dashboard" style="display:none;">
+        <div class="dashboard-metrics">
+          <article class="metric-card"><span class="metric-value" id="metricTotal">–</span><span class="metric-label">เอกสารทั้งหมดในระบบ</span></article>
+          <article class="metric-card"><span class="metric-value" id="metricOpen">–</span><span class="metric-label">งานที่กำลังรอดำเนินการ</span></article>
+          <article class="metric-card metric-danger"><span class="metric-value" id="metricOverdue">–</span><span class="metric-label">รายการเกินกำหนด</span></article>
+          <article class="metric-card"><span class="metric-value" id="metricTat">–</span><span class="metric-label">Turnaround Time เฉลี่ย</span></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="dashboard-panel">
+            <h2>
+  <svg class="ui-icon" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="1.6"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2"/>
+  </svg>
+  ประเภทเอกสารที่พบมาก
+</h2>
+            <div id="typeBreakdown" class="type-breakdown"></div>
+          </article>
+          <article class="dashboard-panel">
+            <h2>
+  <svg class="ui-icon" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="1.6"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+  </svg>
+  รายการเกินกำหนด
+</h2>
+            <div id="overdueList" class="overdue-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-detail" style="display:none;">
+        <button class="btn" onclick="goView('inbox')">← กลับกล่องเอกสาร</button>
+        <div class="manager-detail-grid">
+          <article class="detail-card">
+            <div class="mono detail-ref" id="detailRef"></div>
+            <h2 class="detail-subject" id="detailSubject"></h2>
+            <div class="detail-meta" id="detailMeta"></div>
+            <span class="status-pill" id="detailStatus"></span>
+            <div class="manager-fields">
+              <div class="field-row"><span class="fname">ผู้ส่ง</span><span class="fnote" id="detailSender"></span></div>
+              <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
+              <div class="field-row"><span class="fname">วันที่รับเข้าระบบ</span><span class="fnote mono" id="detailCreatedAt"></span></div>
+              <div class="field-row"><span class="fname">กำหนดเสร็จ</span><span class="fnote mono" id="detailDeadline"></span></div>
+              <div class="field-row"><span class="fname">ผู้ถือครองปัจจุบัน</span><span class="fnote" id="detailAssignee"></span></div>
+              <div class="field-row"><span class="fname">หมายเหตุ</span><span class="fnote" id="detailDescription"></span></div>
+              <div class="field-row"><span class="fname">ไฟล์แนบ</span><span class="fnote" id="detailFile"></span></div>
+            </div>
+            <button class="btn btn-primary" id="btnDownload" onclick="downloadFile()">
+  <svg class="ui-icon" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="1.6"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 3v12 M7 10l5 5 5-5 M4 17v4h16v-4"/>
+  </svg>
+  ดาวน์โหลดเอกสาร
+</button>
+          </article>
+          <article class="side-card">
+            <h3>ประวัติการดำเนินการ</h3>
+            <ul class="timeline-list" id="managerHistoryList"><li class="timeline-item"><div class="timeline-by">กำลังโหลดประวัติ...</div></li></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="assets/js/dialogs.js"></script>
+  <script src="assets/js/manager.js"></script>
+</body>
+</html>

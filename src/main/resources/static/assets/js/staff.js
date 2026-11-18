@@ -433,6 +433,7 @@ let allDocuments = [];
         const deadline = document.getElementById('fDeadline').value;
         const description = document.getElementById('fDescription').value;
         const fileInput = document.getElementById('fFile');
+        const documentDate = document.getElementById('fDocumentDate').value;
 
         const formData = new FormData();
         const autoRefNo = 'DOC-' + Date.now();
@@ -440,7 +441,7 @@ let allDocuments = [];
         formData.append('submissionChannel', 'ระบบ e-Mailbox');
         formData.append('subject', subject);
         formData.append('senderName', senderName);
-        formData.append('documentDate', document.getElementById('fDocumentDate').value);
+        formData.append('documentDate', documentDate);
 
         if (typeId) formData.append('typeId', typeId);
         if (assignedTo) formData.append('assignedTo', assignedTo);
@@ -457,7 +458,18 @@ let allDocuments = [];
             });
 
             if (res.ok) {
-                await appAlert('บันทึกเอกสารสำเร็จ!');
+                const savedDocument = await res.json();
+                const savedDocumentDate = savedDocument.documentDate || savedDocument.document_date || '';
+                const normalizedSavedDate = String(savedDocumentDate).slice(0, 10);
+                if (normalizedSavedDate === documentDate) {
+                    await appAlert('บันทึกเอกสารและวันที่ในเอกสารสำเร็จ!');
+                } else {
+                    await appAlert(
+                        `เอกสารถูกบันทึกแล้ว แต่วันที่ในเอกสารไม่ตรงกับที่เลือก (${documentDate}) ` +
+                        `ระบบตอบกลับเป็น "${normalizedSavedDate || 'ไม่ได้ระบุ'}" กรุณาแจ้งผู้ดูแลระบบให้อัปเดต backend ` +
+                        'และอย่าลงทะเบียนเอกสารซ้ำ'
+                    );
+                }
                 document.getElementById('registerForm').reset();
                 setDocumentDateToToday();
                 goView('inbox');

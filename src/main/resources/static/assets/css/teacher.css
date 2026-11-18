@@ -66,6 +66,16 @@
       cursor: not-allowed;
       opacity: 0.65;
     }
+    .download-original-button {
+      transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+    .download-original-button:hover,
+    .download-original-button:focus-visible {
+      background: #800000;
+      border-color: #800000;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(128, 0, 0, 0.2);
+    }
 
     /* ตารางกริดฟิลด์รายละเอียดเอกสาร */
     .fields-grid-2col {

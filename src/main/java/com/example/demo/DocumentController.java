@@ -55,7 +55,7 @@ public class DocumentController {
         return ResponseEntity.ok(docs);
     }
 
-    // 2. ลงทะเบียนเอกสารใหม่ (รองรับ S3, assignedTo, deadline, description และบันทึก History)
+    // 2. ลงทะเบียนเอกสารใหม่ (รองรับวันที่เอกสาร, S3, assignedTo, deadline และ description)
     @PostMapping
     public ResponseEntity<?> createDocument(
             @RequestParam("referenceNumber") String referenceNumber,
@@ -64,7 +64,7 @@ public class DocumentController {
             @RequestParam("submissionChannel") String submissionChannel,
             @RequestParam(value = "typeId", required = false) Integer typeId,
             @RequestParam(value = "assignedTo", required = false) Long assignedTo,
-            @RequestParam(value = "documentDate", required = false) String documentDate,
+            @RequestParam("documentDate") String documentDate,
             @RequestParam(value = "deadline", required = false) String deadline,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "file", required = false) MultipartFile file,

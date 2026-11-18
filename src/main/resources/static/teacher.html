@@ -11,7 +11,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/status.js"></script>
-  <link rel="stylesheet" href="assets/css/teacher.css">
+  <link rel="stylesheet" href="assets/css/teacher.css?v=20261118-2">
   <link rel="stylesheet" href="assets/css/workspace.css">
 </head>
 
@@ -110,7 +110,7 @@
             <div class="v4-card" id="documentPreviewCard" style="display:none;">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px;">
                 <h3 style="margin:0;">อ่านเอกสาร</h3>
-                <button class="btn-outline-action" id="btnDownload" onclick="downloadFile()" style="display:none;">ดาวน์โหลดต้นฉบับ</button>
+                <button class="btn-outline-action download-original-button" id="btnDownload" onclick="downloadFile()" title="ดาวน์โหลดไฟล์เอกสารต้นฉบับลงในอุปกรณ์ของคุณ" aria-label="ดาวน์โหลดไฟล์เอกสารต้นฉบับ" style="display:none;">ดาวน์โหลดต้นฉบับ</button>
               </div>
               <div id="documentPreviewContent"></div>
               <p id="documentPreviewMessage" style="display:none; margin:0; color:#64748b; font-size:13px;"></p>
@@ -235,7 +235,7 @@
   </div>
 
   <script src="assets/js/dialogs.js"></script>
-  <script src="assets/js/teacher.js"></script>
+  <script src="assets/js/teacher.js?v=20261118-2"></script>
 </body>
 
 </html>

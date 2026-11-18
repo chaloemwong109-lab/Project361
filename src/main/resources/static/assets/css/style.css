@@ -281,6 +281,17 @@
     border-color: var(--seal);
   }
 
+  .download-document-button {
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+
+  .download-document-button:hover,
+  .download-document-button:focus-visible {
+    background: #43101b;
+    border-color: #43101b;
+    color: #fff;
+  }
+
   .hero-visual {
     display: flex;
     align-items: center;

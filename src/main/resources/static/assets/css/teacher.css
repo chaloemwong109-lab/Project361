@@ -71,10 +71,9 @@
     }
     .download-original-button:hover,
     .download-original-button:focus-visible {
-      background: #800000;
-      border-color: #800000;
-      color: #fff;
-      box-shadow: 0 3px 10px rgba(128, 0, 0, 0.2);
+      background: #f3e7e9;
+      border-color: #9e1b2e;
+      color: #5c1524;
     }
 
     /* ตารางกริดฟิลด์รายละเอียดเอกสาร */

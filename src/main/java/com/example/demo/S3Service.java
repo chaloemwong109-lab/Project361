@@ -74,24 +74,47 @@ public class S3Service {
 
     // 6. สร้าง Presigned URL สำหรับเปิดดูหรือดาวน์โหลดไฟล์จาก S3 (อายุ 30 วินาที)
     public String generatePresignedUrl(String fileName) {
+        return generatePresignedUrl(fileName, false);
+    }
+
+    public String generatePresignedUrl(String fileName, boolean inline) {
         S3Presigner presigner = S3Presigner.builder()
                 .region(Region.of(region))
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
 
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+        GetObjectRequest.Builder getObjectRequestBuilder = GetObjectRequest.builder()
                 .bucket(bucketName)
-                .key(fileName)
-                .build();
+                .key(fileName);
+
+        if (inline) {
+            String contentType = getInlinePreviewContentType(fileName);
+            if (contentType != null) {
+                getObjectRequestBuilder
+                        .responseContentDisposition("inline")
+                        .responseContentType(contentType);
+            }
+        }
 
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofSeconds(30))
-                .getObjectRequest(getObjectRequest)
+                .getObjectRequest(getObjectRequestBuilder.build())
                 .build();
 
         String url = presigner.presignGetObject(presignRequest).url().toString();
         presigner.close();
         return url;
+    }
+
+    private String getInlinePreviewContentType(String fileName) {
+        String normalizedName = fileName.toLowerCase(java.util.Locale.ROOT);
+        if (normalizedName.endsWith(".pdf")) return "application/pdf";
+        if (normalizedName.endsWith(".png")) return "image/png";
+        if (normalizedName.endsWith(".jpg") || normalizedName.endsWith(".jpeg")) return "image/jpeg";
+        if (normalizedName.endsWith(".gif")) return "image/gif";
+        if (normalizedName.endsWith(".webp")) return "image/webp";
+        if (normalizedName.endsWith(".bmp")) return "image/bmp";
+        return null;
     }
 
 }

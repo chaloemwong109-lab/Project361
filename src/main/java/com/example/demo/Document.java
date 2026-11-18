@@ -47,6 +47,9 @@ public class Document {
     @Column(name = "deadline")
     private String deadline; // เก็บรูปแบบ YYYY-MM-DD
 
+    @Column(name = "document_date")
+    private String documentDate;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description; // คำอธิบายหรือหมายเหตุเพิ่มเติมตอนลงทะเบียน
 
@@ -165,6 +168,13 @@ public class Document {
     }
     public void setDeadline(String deadline) {
         this.deadline = deadline;
+    }
+
+    public String getDocumentDate() {
+        return documentDate;
+    }
+    public void setDocumentDate(String documentDate) {
+        this.documentDate = documentDate;
     }
 
     public String getDescription() {

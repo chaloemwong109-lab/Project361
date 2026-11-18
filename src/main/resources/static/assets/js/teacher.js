@@ -4,7 +4,7 @@ let currentUser = null;
     let currentStatusFilter = '';
     let docTypeMap = {};
     let lecturerMap = {};
-    let currentScopeTab = 'ALL';
+    let currentScopeTab = 'ASSIGNED';
 
     function formatDateTime(isoStr) {
       if (!isoStr) return '-';
@@ -16,6 +16,71 @@ let currentUser = null;
       const hh = String(d.getHours()).padStart(2, '0');
       const min = String(d.getMinutes()).padStart(2, '0');
       return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+    }
+
+    function renderDocumentPreview(doc, hasFile) {
+      const card = document.getElementById('documentPreviewCard');
+      const content = document.getElementById('documentPreviewContent');
+      const message = document.getElementById('documentPreviewMessage');
+      if (!card || !content || !message) return;
+
+      content.replaceChildren();
+      message.style.display = 'none';
+      card.style.display = hasFile ? 'block' : 'none';
+      if (!hasFile) return;
+
+      const fileName = String(doc.attachmentFile || '').toLowerCase();
+      const docId = doc.documentId || doc.id;
+      const previewUrl = `/api/documents/${docId}/download?inline=true`;
+
+      if (fileName.endsWith('.pdf')) {
+        const frame = document.createElement('iframe');
+        frame.className = 'document-preview-frame';
+        frame.title = 'ตัวอย่างเอกสาร PDF';
+        frame.src = previewUrl;
+        content.appendChild(frame);
+      } else if (['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'].some(extension => fileName.endsWith(extension))) {
+        const image = document.createElement('img');
+        image.className = 'document-preview-image';
+        image.alt = 'ตัวอย่างเอกสารแนบ';
+        image.addEventListener('error', () => {
+          content.replaceChildren();
+          message.textContent = 'ไม่สามารถเปิดตัวอย่างไฟล์นี้ได้ กรุณาดาวน์โหลดเพื่ออ่านเอกสาร';
+          message.style.display = 'block';
+        });
+        image.src = previewUrl;
+        content.appendChild(image);
+      } else {
+        message.textContent = 'ไม่สามารถแสดงตัวอย่างไฟล์นี้ได้ กรุณาดาวน์โหลดเพื่ออ่านเอกสาร';
+        message.style.display = 'block';
+      }
+    }
+
+    function getNextStatus(status) {
+      const current = String(status || '').trim().toUpperCase();
+      if (current === 'PENDING' || current === 'รอรับเรื่อง') {
+        return { value: 'SUBMITTED', label: 'รับเรื่องแล้ว', button: 'รับเรื่อง' };
+      }
+      if (current === 'SUBMITTED' || current === 'รับเรื่องแล้ว') {
+        return { value: 'IN_PROGRESS', label: 'กำลังดำเนินการ', button: 'เริ่มดำเนินการ' };
+      }
+      if (current === 'IN_PROGRESS' || current === 'กำลังดำเนินการ') {
+        return { value: 'DONE', label: 'เสร็จสิ้น', button: 'ทำเครื่องหมายว่าเสร็จสิ้น' };
+      }
+      return null;
+    }
+
+    function updateNextStatusAction(doc) {
+      const button = document.getElementById('statusAdvanceButton');
+      const hint = document.getElementById('statusNextHint');
+      if (!button || !hint || !doc) return;
+
+      const nextStatus = getNextStatus(doc.status || doc.currentStatus);
+      button.disabled = !nextStatus;
+      button.textContent = nextStatus ? nextStatus.button : 'ดำเนินการเสร็จสิ้นแล้ว';
+      hint.textContent = nextStatus
+        ? `สถานะถัดไป: ${nextStatus.label}`
+        : 'เอกสารนี้ดำเนินการครบทุกขั้นตอนแล้ว';
     }
 
     function formatDateOnly(isoStr) {
@@ -136,7 +201,12 @@ let currentUser = null;
       tbody.innerHTML = '';
 
       if (!docs || docs.length === 0) {
-        if (emptyDiv) emptyDiv.style.display = 'block';
+        if (emptyDiv) {
+          emptyDiv.textContent = currentScopeTab === 'ASSIGNED'
+            ? 'ไม่มีเรื่องรอรับเรื่องที่ส่งถึงคุณ'
+            : 'ยังไม่มีเอกสารในระบบสำหรับอาจารย์';
+          emptyDiv.style.display = 'block';
+        }
         return;
       }
       if (emptyDiv) emptyDiv.style.display = 'none';
@@ -172,6 +242,7 @@ let currentUser = null;
         }
 
         const receiveDate = doc.createdAt ? formatDateOnly(doc.createdAt) : '-';
+        const documentDate = doc.documentDate ? `<span class="cell-sub" style="display:block; font-size:11.5px; color:#8c7a6b;">วันที่ในเอกสาร: ${doc.documentDate}</span>` : '';
 
         tr.innerHTML = `
           <td class="mono">${doc.referenceNumber || '-'}</td>
@@ -180,7 +251,7 @@ let currentUser = null;
             <span class="cell-sub" style="display:block; font-size:11.5px; color:#9E8C82; margin-top:2px;">${typeName}</span>
           </td>
           <td>${doc.senderName || '-'}</td>
-          <td class="mono">${receiveDate}${deadlineSub}</td>
+          <td class="mono">${documentDate}${receiveDate}${deadlineSub}</td>
           <td>${statusBadgeHtml}</td>
         `;
         tbody.appendChild(tr);
@@ -209,7 +280,10 @@ let currentUser = null;
         const typeName = (docTypeMap[d.typeId] || '').toLowerCase();
         const overdue = isDocumentOverdue(d.deadline, d.status, d.currentStatus, d.isDeleted);
 
-        const matchScope = (currentScopeTab === 'ALL') || isAssignee || isForwarder;
+        const waitingForTeacher = isAssignee
+          && !d.isDeleted
+          && (effectiveStatus === 'PENDING' || d.currentStatus === 'รอรับเรื่อง');
+        const matchScope = currentScopeTab === 'ALL' || waitingForTeacher;
 
         let matchStatus = true;
         if (currentStatusFilter) {
@@ -284,6 +358,7 @@ let currentUser = null;
 
       // ฟิลด์ในการ์ดรายละเอียดเอกสาร
       if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt ? formatDateOnly(doc.createdAt) : (doc.documentDate || '-');
+      if (document.getElementById('detailDocumentDate')) document.getElementById('detailDocumentDate').textContent = doc.documentDate || '-';
       if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline || 'ไม่ได้กำหนด';
       if (document.getElementById('detailSender')) document.getElementById('detailSender').textContent = doc.senderName || '-';
       if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';
@@ -314,12 +389,12 @@ let currentUser = null;
       if (btnDownload) {
         btnDownload.style.display = hasFile ? 'inline-block' : 'none';
       }
+      renderDocumentPreview(doc, hasFile);
 
       // แสดง/ซ่อน กล่องจัดการเอกสาร (เฉพาะผู้รับผิดชอบปัจจุบัน)
       const forwardSection = document.getElementById('forwardCardSection');
       const deadlineSection = document.getElementById('deadlineCardSection');
       const statusSection = document.getElementById('statusCardSection');
-      const statusDropdown = document.getElementById('statusDropdown');
       const teacherNewDeadline = document.getElementById('teacherNewDeadline');
 
       if (isAssignee && !doc.isDeleted) {
@@ -330,7 +405,7 @@ let currentUser = null;
         }
         if (statusSection) {
           statusSection.style.display = 'block';
-          if (statusDropdown) statusDropdown.value = doc.status || 'PENDING';
+          updateNextStatusAction(doc);
         }
       } else {
         if (forwardSection) forwardSection.style.display = 'none';
@@ -371,19 +446,20 @@ let currentUser = null;
     }
 
     // 10. บันทึกการเปลี่ยนสถานะเอกสาร
-    async function saveStatusChange() {
+    async function advanceDocumentStatus() {
       if (!selectedDoc) return;
-      const statusDropdown = document.getElementById('statusDropdown');
-      const newStatus = statusDropdown ? statusDropdown.value : '';
-      if (!newStatus) return;
+      const nextStatus = getNextStatus(selectedDoc.status || selectedDoc.currentStatus);
+      if (!nextStatus) return;
 
       try {
         const docId = selectedDoc.documentId || selectedDoc.id;
-        if (!await appConfirm('ยืนยันการเปลี่ยนสถานะเอกสารหรือไม่?')) return;
+        if (!await appConfirm(`ยืนยัน${nextStatus.button}หรือไม่?`)) return;
+        const advanceButton = document.getElementById('statusAdvanceButton');
+        if (advanceButton) advanceButton.disabled = true;
         const res = await fetch(`/api/documents/${docId}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus })
+          body: JSON.stringify({ status: nextStatus.value })
         });
         if (res.ok) {
           const updated = await res.json();
@@ -397,6 +473,8 @@ let currentUser = null;
       } catch (err) {
         console.error(err);
         await appAlert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      } finally {
+        updateNextStatusAction(selectedDoc);
       }
     }
 
@@ -510,12 +588,18 @@ let currentUser = null;
       const titleEl = document.querySelector('.app-topbar h1');
       const subEl = document.querySelector('.app-topbar .sub');
       if (scope === 'ASSIGNED') {
-        if (titleEl) titleEl.textContent = 'งานที่ได้รับมอบหมาย';
-        if (subEl) subEl.textContent = 'รายการเอกสารที่ระบุให้คุณเป็นผู้รับผิดชอบโดยตรง หรือเคยส่งต่อ';
+        if (titleEl) titleEl.textContent = 'เรื่องรอคุณ';
+        if (subEl) subEl.textContent = 'เอกสารที่ส่งถึงคุณและรอรับเรื่อง';
       } else {
-        if (titleEl) titleEl.textContent = 'กล่องเอกสาร';
-        if (subEl) subEl.textContent = 'เอกสารทั่วไปและเอกสารที่ได้รับมอบหมาย';
+        if (titleEl) titleEl.textContent = 'เอกสารทั้งหมด';
+        if (subEl) subEl.textContent = 'รายการเอกสารทั้งหมดที่คุณมีสิทธิ์เข้าถึง';
       }
+
+      const statusFilters = document.getElementById('teacherStatusFilters');
+      if (statusFilters) statusFilters.style.display = scope === 'ALL' ? 'flex' : 'none';
+      currentStatusFilter = '';
+      document.querySelectorAll('.doc-filter').forEach(btn => btn.classList.remove('active'));
+      if (scope === 'ALL') document.querySelector('.doc-filter')?.classList.add('active');
 
       goView('inbox');
       applyFilter();

@@ -31,11 +31,11 @@
       </div>
 
       <nav>
-        <button class="app-nav-item active" id="nav-all" onclick="switchTeacherTab('ALL')">
-          <span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z M4 13h4l2 3h4l2-3h4 M12 4v7 m-3-3 3 3 3-3"/></svg></span> กล่องเอกสาร
+        <button class="app-nav-item" id="nav-all" onclick="switchTeacherTab('ALL')">
+          <span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z M4 13h4l2 3h4l2-3h4 M12 4v7 m-3-3 3 3 3-3"/></svg></span> เอกสารทั้งหมด
         </button>
-        <button class="app-nav-item" id="nav-assigned" onclick="switchTeacherTab('ASSIGNED')">
-          <span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4H6l4-4z M12 13v8"/></svg></span> งานที่ได้รับมอบหมาย
+        <button class="app-nav-item active" id="nav-assigned" onclick="switchTeacherTab('ASSIGNED')">
+          <span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4H6l4-4z M12 13v8"/></svg></span> เรื่องรอคุณ
         </button>
       </nav>
 
@@ -54,8 +54,8 @@
       <div class="app-topbar">
         <div>
           <div style="font-size: 12px; color: #8c7e75; margin-bottom: 2px;">ระบบจัดการเอกสาร</div>
-          <h1 id="appTitle" style="margin: 0; font-size: 24px;">กล่องเอกสาร</h1>
-          <div class="sub" id="appSub">เอกสารทั่วไปและเอกสารที่ได้รับมอบหมาย</div>
+          <h1 id="appTitle" style="margin: 0; font-size: 24px;">เรื่องรอคุณ</h1>
+          <div class="sub" id="appSub">เอกสารที่ส่งถึงคุณและรอรับเรื่อง</div>
         </div>
         <div id="topRefBox" class="top-doc-ref-box" style="display: none;">
           <span class="top-doc-ref-label">เลขที่เอกสาร</span>
@@ -73,7 +73,7 @@
           <button class="btn btn-primary" onclick="applyFilter()">ค้นหา</button>
         </div>
 
-        <div class="doc-filter-row">
+        <div class="doc-filter-row" id="teacherStatusFilters" style="display:none;">
           <button class="doc-filter active" onclick="filterByStatus('')">ทั้งหมด</button>
           <button class="doc-filter" onclick="filterByStatus('PENDING')">รอรับเรื่อง</button>
           <button class="doc-filter" onclick="filterByStatus('SUBMITTED')">รับเรื่องแล้ว</button>
@@ -90,14 +90,14 @@
                 <th>เลขที่อ้างอิง</th>
                 <th>เรื่อง</th>
                 <th>ผู้ส่ง</th>
-                <th>วันที่รับเอกสาร / กำหนดเสร็จ</th>
+                <th>วันที่ในเอกสาร / วันที่รับ / กำหนดเสร็จ</th>
                 <th>สถานะ</th>
               </tr>
             </thead>
             <tbody id="docTableBody"></tbody>
           </table>
         </div>
-        <div class="empty-state" id="docEmpty">ยังไม่มีเอกสารในระบบสำหรับอาจารย์</div>
+        <div class="empty-state" id="docEmpty">ไม่มีเรื่องรอรับเรื่องที่ส่งถึงคุณ</div>
       </div>
 
       <!-- ===== View: Detail ===== -->
@@ -107,6 +107,21 @@
         <div class="detail-grid-v4">
           <!-- คอลัมน์ซ้าย (Left Column) -->
           <div>
+            <div class="v4-card" id="documentPreviewCard" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px;">
+                <h3 style="margin:0;">อ่านเอกสาร</h3>
+                <button class="btn-outline-action" id="btnDownload" onclick="downloadFile()" style="display:none;">ดาวน์โหลดต้นฉบับ</button>
+              </div>
+              <div id="documentPreviewContent"></div>
+              <p id="documentPreviewMessage" style="display:none; margin:0; color:#64748b; font-size:13px;"></p>
+            </div>
+
+            <div class="v4-card" id="statusCardSection" style="display:none;">
+              <h3>ขั้นตอนถัดไป</h3>
+              <p id="statusNextHint" style="margin:0 0 12px; color:#64748b; font-size:13px;"></p>
+              <button class="btn-outline-action" id="statusAdvanceButton" onclick="advanceDocumentStatus()" style="width:100%;"></button>
+            </div>
+
             <!-- การ์ด 1: ข้อมูลหัวเรื่องและสถานะ -->
             <div class="v4-card" style="display: flex; justify-content: space-between; align-items: flex-start;">
               <div style="display: flex; gap: 14px; align-items: flex-start;">
@@ -137,6 +152,10 @@
                   <span class="field-card-value mono" id="detailCreatedAt">-</span>
                 </div>
                 <div class="field-card-item">
+                  <span class="field-card-label">วันที่ในเอกสาร</span>
+                  <span class="field-card-value mono" id="detailDocumentDate">-</span>
+                </div>
+                <div class="field-card-item">
                   <span class="field-card-label">กำหนดเสร็จ (Deadline)</span>
                   <span class="field-card-value mono" id="detailDeadline">-</span>
                 </div>
@@ -164,7 +183,6 @@
                     <span class="field-card-label">ไฟล์แนบ</span>
                     <span class="field-card-value" id="detailFile">ไม่มีไฟล์แนบ</span>
                   </div>
-                  <button class="btn-outline-action" id="btnDownload" onclick="downloadFile()" style="display:none;">ดาวน์โหลดเอกสารต้นฉบับ</button>
                 </div>
               </div>
             </div>
@@ -209,18 +227,6 @@
               <button class="btn-outline-action" onclick="updateDeadlineByTeacher()" style="width: 100%;">บันทึกกำหนดเวลาใหม่</button>
             </div>
 
-            <!-- การ์ดขวา 3: อัปเดตสถานะเอกสาร -->
-            <div class="v4-card" id="statusCardSection" style="display:none;">
-              <h3>อัปเดตสถานะเอกสาร</h3>
-              <label for="statusDropdown" style="display:block; font-size:12.5px; color:#475569; margin-bottom:6px;">เลือกสถานะปัจจุบัน</label>
-              <select id="statusDropdown" class="form-control-custom" style="margin-bottom:14px;">
-                <option value="PENDING" disabled hidden>รอรับเรื่อง</option>
-                <option value="SUBMITTED">รับเรื่องแล้ว</option>
-                <option value="IN_PROGRESS">กำลังดำเนินการ</option>
-                <option value="DONE">เสร็จสิ้น</option>
-              </select>
-              <button class="btn-outline-action" onclick="saveStatusChange()" style="width: 100%;">บันทึกสถานะ</button>
-            </div>
           </div>
         </div>
       </div>

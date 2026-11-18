@@ -17,6 +17,17 @@ let allDocuments = [];
         return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
     }
 
+    function setDocumentDateToToday() {
+        const input = document.getElementById('fDocumentDate');
+        if (!input) return;
+        const today = new Date();
+        input.value = [
+            today.getFullYear(),
+            String(today.getMonth() + 1).padStart(2, '0'),
+            String(today.getDate()).padStart(2, '0')
+        ].join('-');
+    }
+
     // 1. ตรวจสอบสิทธิ์และโหลดข้อมูลเริ่มต้นทั้งหมด
     async function checkStaffAuth() {
         try {
@@ -87,7 +98,7 @@ let allDocuments = [];
                 const lecturers = await res.json();
                 const selectEl = document.getElementById('assignedTo');
                 if (selectEl) {
-                    selectEl.innerHTML = '<option value="">— ไม่ระบุ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>';
+                    selectEl.innerHTML = '<option value="">— ไม่ระบุผู้รับ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>';
                     lecturers.forEach(lec => {
                         lecturerMap[lec.id] = lec.fullName;
                         const opt = document.createElement('option');
@@ -213,6 +224,7 @@ let allDocuments = [];
 
             if (isCanceled) tr.classList.add('is-cancelled');
 
+            const documentDateSub = (doc.date && doc.date !== '-') ? `<span class="cell-sub">วันที่ในเอกสาร: ${doc.date}</span>` : '';
             const deadlineSub = (doc.deadline && doc.deadline !== '-') ? `<span class="cell-sub" style="color:${doc.isOverdue ? '#b91c1c' : '#8c7a6b'};">กำหนดเสร็จ: ${doc.deadline}</span>` : '';
 
             // ป้ายสถานะเดี่ยวไม่ซ้อนกัน
@@ -231,10 +243,10 @@ let allDocuments = [];
                 <td class="mono">${doc.ref}</td>
                 <td>
                     <span style="color:var(--ink);font-weight:600;">${doc.subject}</span>
-                    <span class="cell-sub">${doc.type} · ผู้รับผิดชอบ: ${doc.assigneeName}</span>
+                    <span class="cell-sub">${doc.type} · เรียน: ${doc.assigneeName}</span>
                 </td>
                 <td>${doc.sender}</td>
-                <td class="mono">${receiveDate}${deadlineSub}</td>
+                <td class="mono">${documentDateSub}${receiveDate}${deadlineSub}</td>
                 <td>${statusBadgeHtml}</td>
             `;
 
@@ -270,6 +282,7 @@ let allDocuments = [];
         document.getElementById('detailSender').textContent = doc.sender;
         document.getElementById('detailType').textContent = doc.type;
         if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt;
+        if (document.getElementById('detailDocumentDate')) document.getElementById('detailDocumentDate').textContent = doc.date;
         if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline;
         if (document.getElementById('detailAssignee')) document.getElementById('detailAssignee').textContent = doc.assigneeName;
         if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';
@@ -422,13 +435,11 @@ let allDocuments = [];
 
         const formData = new FormData();
         const autoRefNo = 'DOC-' + Date.now();
-        const todayStr = new Date().toISOString().slice(0, 10);
-
         formData.append('referenceNumber', autoRefNo);
         formData.append('submissionChannel', 'ระบบ e-Mailbox');
         formData.append('subject', subject);
         formData.append('senderName', senderName);
-        formData.append('documentDate', todayStr);
+        formData.append('documentDate', document.getElementById('fDocumentDate').value);
 
         if (typeId) formData.append('typeId', typeId);
         if (assignedTo) formData.append('assignedTo', assignedTo);
@@ -447,6 +458,7 @@ let allDocuments = [];
             if (res.ok) {
                 await appAlert('บันทึกเอกสารสำเร็จ!');
                 document.getElementById('registerForm').reset();
+                setDocumentDateToToday();
                 goView('inbox');
                 await fetchDocumentsFromAPI();
             } else {
@@ -472,6 +484,7 @@ let allDocuments = [];
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        setDocumentDateToToday();
         checkStaffAuth();
         document.getElementById('docSearch')?.addEventListener('input', applyFilter);
         document.getElementById('docTypeFilter')?.addEventListener('change', applyFilter);

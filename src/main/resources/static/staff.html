@@ -86,7 +86,7 @@
                 <th>เลขที่อ้างอิง</th>
                 <th>เรื่อง</th>
                 <th>ผู้ส่ง</th>
-                <th>วันที่รับเอกสาร / กำหนดเสร็จ</th>
+                <th>วันที่ในเอกสาร / วันที่รับ / กำหนดเสร็จ</th>
                 <th>สถานะ</th>
               </tr>
             </thead>
@@ -110,18 +110,23 @@
                 <input type="text" id="fSubject" placeholder="หัวเรื่องของเอกสารโดยย่อ" required>
               </div>
               <div class="field">
+                <label for="fDocumentDate">วันที่ในเอกสาร</label>
+                <input type="date" id="fDocumentDate" required>
+              </div>
+              <div class="field">
                 <label for="fType">ประเภทเอกสาร</label>
                 <select id="fType" required>
                   <option value="">เลือกประเภท</option>
                 </select>
               </div>
               
-              <!-- ช่องเลือกผู้รับผิดชอบ -->
+              <!-- ช่องเลือกผู้รับเอกสาร -->
               <div class="field">
-                <label for="assignedTo">ผู้รับผิดชอบดำเนินการ</label>
+                <label for="assignedTo">เรียน</label>
                 <select id="assignedTo" name="assignedTo">
-                  <option value="">— ไม่ระบุ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>
+                  <option value="">— ไม่ระบุผู้รับ (เอกสารทั่วไป/ทุกคนเห็นได้) —</option>
                 </select>
+                <small>เลือกผู้รับเอกสารที่ต้องดำเนินการ</small>
               </div>
 
               <!-- 🌟 V4: เพิ่มช่องกำหนดวัน Deadline -->
@@ -167,6 +172,7 @@
               <div class="field-row"><span class="fname">ประเภทเอกสาร</span><span class="fnote" id="detailType"></span></div>
               <!-- 🌟 V4: วันที่รับเอกสารจาก created_at -->
               <div class="field-row"><span class="fname">วันที่รับเอกสารเข้าระบบ</span><span class="fnote mono" id="detailCreatedAt"></span></div>
+              <div class="field-row"><span class="fname">วันที่ในเอกสาร</span><span class="fnote mono" id="detailDocumentDate"></span></div>
               <!-- 🌟 V4: กำหนดเสร็จ (Deadline) -->
               <div class="field-row"><span class="fname">กำหนดเสร็จ (Deadline)</span><span class="fnote mono" id="detailDeadline"></span></div>
               <!-- 🌟 V4: ผู้ถือครองปัจจุบัน -->

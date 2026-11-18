@@ -64,6 +64,7 @@ public class DocumentController {
             @RequestParam("submissionChannel") String submissionChannel,
             @RequestParam(value = "typeId", required = false) Integer typeId,
             @RequestParam(value = "assignedTo", required = false) Long assignedTo,
+            @RequestParam(value = "documentDate", required = false) String documentDate,
             @RequestParam(value = "deadline", required = false) String deadline,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "file", required = false) MultipartFile file,
@@ -82,6 +83,7 @@ public class DocumentController {
             doc.setSubmissionChannel(submissionChannel);
             doc.setTypeId(typeId);
             doc.setAssignedTo(assignedTo); // null = เอกสารทั่วไป, มีค่า = มอบหมายให้อาจารย์
+            doc.setDocumentDate((documentDate != null && !documentDate.isBlank()) ? documentDate : null);
             doc.setDeadline((deadline != null && !deadline.isBlank()) ? deadline : null);
             doc.setDescription((description != null && !description.isBlank()) ? description : null);
 
@@ -338,7 +340,10 @@ public class DocumentController {
 
     // 8. ฟังก์ชันดาวน์โหลดไฟล์แนบจาก S3 (อัปเกรดความปลอดภัยสูงสุดสำหรับ V4)
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadAttachment(@PathVariable Integer id, HttpSession session) {
+    public ResponseEntity<?> downloadAttachment(
+            @PathVariable Integer id,
+            @RequestParam(name = "inline", defaultValue = "false") boolean inline,
+            HttpSession session) {
         // ด่านที่ 1: ตรวจสอบว่าล็อกอินอยู่ในระบบหรือไม่
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null) {
@@ -380,7 +385,7 @@ public class DocumentController {
             }
 
             // ให้ S3Service สร้างลิงก์ชั่วคราวจาก S3 ให้
-            String presignedUrl = s3Service.generatePresignedUrl(fileKey);
+            String presignedUrl = s3Service.generatePresignedUrl(fileKey, inline);
 
             return ResponseEntity.status(HttpStatus.FOUND)
                     .location(URI.create(presignedUrl))

@@ -224,7 +224,6 @@ let allDocuments = [];
 
             if (isCanceled) tr.classList.add('is-cancelled');
 
-            const documentDateSub = doc.date ? `<span class="cell-sub">วันที่ในเอกสาร: ${doc.date}</span>` : '';
             const deadlineSub = (doc.deadline && doc.deadline !== '-') ? `<span class="cell-sub" style="color:${doc.isOverdue ? '#b91c1c' : '#8c7a6b'};">กำหนดเสร็จ: ${doc.deadline}</span>` : '';
 
             // ป้ายสถานะเดี่ยวไม่ซ้อนกัน
@@ -246,7 +245,7 @@ let allDocuments = [];
                     <span class="cell-sub">${doc.type} · เรียน: ${doc.assigneeName}</span>
                 </td>
                 <td>${doc.sender}</td>
-                <td class="mono">${documentDateSub}${receiveDate}${deadlineSub}</td>
+                <td class="mono">${receiveDate}${deadlineSub}</td>
                 <td>${statusBadgeHtml}</td>
             `;
 

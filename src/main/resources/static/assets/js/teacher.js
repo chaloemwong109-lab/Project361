@@ -59,22 +59,21 @@ let currentUser = null;
     function getNextStatus(status) {
       const current = String(status || '').trim().toUpperCase();
       if (current === 'PENDING' || current === 'รอรับเรื่อง') {
-        return { value: 'SUBMITTED', label: 'รับเรื่องแล้ว', button: 'รับเรื่อง' };
+        return { value: 'SUBMITTED', button: 'รับเรื่อง' };
       }
       if (current === 'SUBMITTED' || current === 'รับเรื่องแล้ว') {
-        return { value: 'IN_PROGRESS', label: 'กำลังดำเนินการ', button: 'เริ่มดำเนินการ' };
+        return { value: 'IN_PROGRESS', button: 'เริ่มดำเนินการ' };
       }
       if (current === 'IN_PROGRESS' || current === 'กำลังดำเนินการ') {
-        return { value: 'DONE', label: 'เสร็จสิ้น', button: 'ทำเครื่องหมายว่าเสร็จสิ้น' };
+        return { value: 'DONE', button: 'ทำเครื่องหมายว่าเสร็จสิ้น' };
       }
       return null;
     }
 
     function updateNextStatusAction(doc) {
       const button = document.getElementById('statusAdvanceButton');
-      const hint = document.getElementById('statusNextHint');
       const instruction = document.getElementById('statusNextInstruction');
-      if (!button || !hint || !instruction || !doc) return;
+      if (!button || !instruction || !doc) return;
 
       const nextStatus = getNextStatus(doc.status || doc.currentStatus);
       button.disabled = !nextStatus;
@@ -82,9 +81,6 @@ let currentUser = null;
       instruction.textContent = nextStatus
         ? 'หลังอ่านเอกสารแล้ว กดปุ่มด้านล่างเพื่อเลื่อนไปยังสถานะถัดไป'
         : 'เอกสารนี้ไม่มีสถานะถัดไปให้ดำเนินการ';
-      hint.textContent = nextStatus
-        ? `สถานะปัจจุบัน: ${doc.currentStatus || doc.status} → ขั้นถัดไป: ${nextStatus.label}`
-        : 'เอกสารนี้ดำเนินการครบทุกขั้นตอนแล้ว';
     }
 
     function formatDateOnly(isoStr) {
@@ -246,7 +242,6 @@ let currentUser = null;
         }
 
         const receiveDate = doc.createdAt ? formatDateOnly(doc.createdAt) : '-';
-        const documentDate = doc.documentDate ? `<span class="cell-sub" style="display:block; font-size:11.5px; color:#8c7a6b;">วันที่ในเอกสาร: ${doc.documentDate}</span>` : '';
 
         tr.innerHTML = `
           <td class="mono">${doc.referenceNumber || '-'}</td>
@@ -255,7 +250,7 @@ let currentUser = null;
             <span class="cell-sub" style="display:block; font-size:11.5px; color:#9E8C82; margin-top:2px;">${typeName}</span>
           </td>
           <td>${doc.senderName || '-'}</td>
-          <td class="mono">${documentDate}${receiveDate}${deadlineSub}</td>
+          <td class="mono">${receiveDate}${deadlineSub}</td>
           <td>${statusBadgeHtml}</td>
         `;
         tbody.appendChild(tr);

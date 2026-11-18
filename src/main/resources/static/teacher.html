@@ -90,7 +90,7 @@
                 <th>เลขที่อ้างอิง</th>
                 <th>เรื่อง</th>
                 <th>ผู้ส่ง</th>
-                <th>วันที่ในเอกสาร / วันที่รับ / กำหนดเสร็จ</th>
+                <th>วันที่รับเอกสาร / กำหนดเสร็จ</th>
                 <th>สถานะ</th>
               </tr>
             </thead>
@@ -116,13 +116,6 @@
               <p id="documentPreviewMessage" style="display:none; margin:0; color:#64748b; font-size:13px;"></p>
             </div>
 
-            <div class="v4-card status-next-card" id="statusCardSection" style="display:none;">
-              <h3>โปรดอัปเดตสถานะเอกสาร</h3>
-              <p id="statusNextInstruction" class="status-next-instruction"></p>
-              <p id="statusNextHint" class="status-next-hint"></p>
-              <button class="btn btn-primary status-advance-button" id="statusAdvanceButton" onclick="advanceDocumentStatus()"></button>
-            </div>
-
             <!-- การ์ด 1: ข้อมูลหัวเรื่องและสถานะ -->
             <div class="v4-card" style="display: flex; justify-content: space-between; align-items: flex-start;">
               <div style="display: flex; gap: 14px; align-items: flex-start;">
@@ -138,6 +131,12 @@
                 <span class="status-pill" id="detailStatus"></span>
                 <span class="status-pill status-overdue" id="detailOverdueBadge" style="display:none; margin-left:4px;">เกินกำหนด</span>
               </div>
+            </div>
+
+            <div class="v4-card status-next-card" id="statusCardSection" style="display:none;">
+              <h3>โปรดอัปเดตสถานะเอกสาร</h3>
+              <p id="statusNextInstruction" class="status-next-instruction"></p>
+              <button class="btn btn-primary status-advance-button" id="statusAdvanceButton" onclick="advanceDocumentStatus()"></button>
             </div>
 
             <!-- การ์ด 2: รายละเอียดเอกสาร (Fields Grid 2 คอลัมน์) -->

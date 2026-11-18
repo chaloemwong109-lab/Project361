@@ -128,7 +128,7 @@ let allDocuments = [];
                     ref: dbDoc.referenceNumber || '-',
                     subject: dbDoc.subject || '-',
                     sender: dbDoc.senderName || '-',
-                    date: dbDoc.documentDate || '-',
+                    date: dbDoc.documentDate || dbDoc.document_date || '',
                     createdAt: dbDoc.createdAt ? formatDateTime(dbDoc.createdAt) : '-',
                     deadline: dbDoc.deadline || '-',
                     description: dbDoc.description || '-',
@@ -224,7 +224,7 @@ let allDocuments = [];
 
             if (isCanceled) tr.classList.add('is-cancelled');
 
-            const documentDateSub = (doc.date && doc.date !== '-') ? `<span class="cell-sub">วันที่ในเอกสาร: ${doc.date}</span>` : '';
+            const documentDateSub = doc.date ? `<span class="cell-sub">วันที่ในเอกสาร: ${doc.date}</span>` : '';
             const deadlineSub = (doc.deadline && doc.deadline !== '-') ? `<span class="cell-sub" style="color:${doc.isOverdue ? '#b91c1c' : '#8c7a6b'};">กำหนดเสร็จ: ${doc.deadline}</span>` : '';
 
             // ป้ายสถานะเดี่ยวไม่ซ้อนกัน
@@ -282,7 +282,9 @@ let allDocuments = [];
         document.getElementById('detailSender').textContent = doc.sender;
         document.getElementById('detailType').textContent = doc.type;
         if (document.getElementById('detailCreatedAt')) document.getElementById('detailCreatedAt').textContent = doc.createdAt;
-        if (document.getElementById('detailDocumentDate')) document.getElementById('detailDocumentDate').textContent = doc.date;
+        if (document.getElementById('detailDocumentDate')) {
+            document.getElementById('detailDocumentDate').textContent = doc.date || 'ไม่ได้ระบุวันที่ในเอกสาร';
+        }
         if (document.getElementById('detailDeadline')) document.getElementById('detailDeadline').textContent = doc.deadline;
         if (document.getElementById('detailAssignee')) document.getElementById('detailAssignee').textContent = doc.assigneeName;
         if (document.getElementById('detailDescription')) document.getElementById('detailDescription').textContent = doc.description || '-';

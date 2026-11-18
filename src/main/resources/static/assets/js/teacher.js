@@ -73,13 +73,17 @@ let currentUser = null;
     function updateNextStatusAction(doc) {
       const button = document.getElementById('statusAdvanceButton');
       const hint = document.getElementById('statusNextHint');
-      if (!button || !hint || !doc) return;
+      const instruction = document.getElementById('statusNextInstruction');
+      if (!button || !hint || !instruction || !doc) return;
 
       const nextStatus = getNextStatus(doc.status || doc.currentStatus);
       button.disabled = !nextStatus;
-      button.textContent = nextStatus ? nextStatus.button : 'ดำเนินการเสร็จสิ้นแล้ว';
+      button.textContent = nextStatus ? `อัปเดตสถานะ: ${nextStatus.button}` : 'ดำเนินการเสร็จสิ้นแล้ว';
+      instruction.textContent = nextStatus
+        ? 'หลังอ่านเอกสารแล้ว กดปุ่มด้านล่างเพื่อเลื่อนไปยังสถานะถัดไป'
+        : 'เอกสารนี้ไม่มีสถานะถัดไปให้ดำเนินการ';
       hint.textContent = nextStatus
-        ? `สถานะถัดไป: ${nextStatus.label}`
+        ? `สถานะปัจจุบัน: ${doc.currentStatus || doc.status} → ขั้นถัดไป: ${nextStatus.label}`
         : 'เอกสารนี้ดำเนินการครบทุกขั้นตอนแล้ว';
     }
 

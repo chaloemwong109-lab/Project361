@@ -116,10 +116,11 @@
               <p id="documentPreviewMessage" style="display:none; margin:0; color:#64748b; font-size:13px;"></p>
             </div>
 
-            <div class="v4-card" id="statusCardSection" style="display:none;">
-              <h3>ขั้นตอนถัดไป</h3>
-              <p id="statusNextHint" style="margin:0 0 12px; color:#64748b; font-size:13px;"></p>
-              <button class="btn-outline-action" id="statusAdvanceButton" onclick="advanceDocumentStatus()" style="width:100%;"></button>
+            <div class="v4-card status-next-card" id="statusCardSection" style="display:none;">
+              <h3>โปรดอัปเดตสถานะเอกสาร</h3>
+              <p id="statusNextInstruction" class="status-next-instruction"></p>
+              <p id="statusNextHint" class="status-next-hint"></p>
+              <button class="btn btn-primary status-advance-button" id="statusAdvanceButton" onclick="advanceDocumentStatus()"></button>
             </div>
 
             <!-- การ์ด 1: ข้อมูลหัวเรื่องและสถานะ -->

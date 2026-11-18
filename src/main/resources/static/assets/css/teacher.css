@@ -44,6 +44,34 @@
       margin: 0 auto;
       object-fit: contain;
     }
+    .status-next-card {
+      border-left: 4px solid #800000;
+      background: #fffaf7;
+    }
+    .status-next-card h3 {
+      color: #800000;
+      font-size: 17px;
+    }
+    .status-next-instruction {
+      margin: 0 0 10px;
+      color: #475569;
+      font-size: 13px;
+    }
+    .status-next-hint {
+      margin: 0 0 14px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .status-advance-button {
+      width: 100%;
+      min-height: 44px;
+      font-weight: 700;
+    }
+    .status-advance-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
 
     /* ตารางกริดฟิลด์รายละเอียดเอกสาร */
     .fields-grid-2col {
